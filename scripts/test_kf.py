@@ -13,9 +13,9 @@ if __name__ == "__main__":
     measurement_dim = state_dim
     controls_dim = state_dim
 
-    A = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
-    B = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
-    C = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
+    A = tf.random.normal([batch_dim, horizon, state_dim, state_dim])
+    B = tf.random.normal([batch_dim, horizon, state_dim, controls_dim])
+    C = tf.random.normal([batch_dim, horizon, measurement_dim, state_dim])
 
     states = [
         tf.random.normal([batch_dim, 1, state_dim, 1])]
@@ -63,9 +63,3 @@ if __name__ == "__main__":
 
     error = tf.linalg.norm(result[8] - states[:, 1:, :, :], ord=1)
     print("error smooth", error.numpy())
-
-    for t in range(horizon - 1):
-        print(tf.linalg.norm(result[0][0, t, ...] - states[0, t + 1, ...], ord=1).numpy())
-        print(tf.linalg.norm(result[4][0, t, ...] - states[0, t + 1, ...], ord=1).numpy())
-        print()
-

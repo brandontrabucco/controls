@@ -46,8 +46,8 @@ def kf_update(
 
     # get the batch shape and vector sizes
 
-    measurement_dim = tf.shape(measurement)[-1]
-    state_dim = tf.shape(mean)[-1]
+    measurement_dim = tf.shape(measurement)[-2]
+    state_dim = tf.shape(mean)[-2]
     batch_dim = tf.shape(measurement)[0]
 
     # make sure all inputs conform to the batch shape
@@ -106,20 +106,16 @@ def kf_update(
             measurement_jacobian,
             transpose_b=True), inverse_innovation_covariance)
 
-    print("gain", gain)
-
     # compute the bayes optimal state estimate
 
     mean = predicted_mean + tf.matmul(gain, innovation)
 
     covariance = tf.matmul(
-        tf.eye(state_dim) - tf.matmul(
+        tf.eye(state_dim, batch_shape=[batch_dim]) - tf.matmul(
             gain,
             measurement_jacobian), predicted_covariance)
 
     # compute the log likelihood of the measurement
-
-    print(innovation_covariance, covariance, predicted_covariance)
 
     log_prob_normalizer = tf.math.log(2. * np.pi) * tf.cast(
         measurement_dim, innovation_covariance.dtype) + tf.linalg.logdet(
