@@ -1,0 +1,16 @@
+checkpoint
+step
+events.out.tfevents.**
+*.egg-info**
+*.ckpt**
+.idea**
+*.out**
+*.pkl**
+*.txt**
+*.json**
+*.csv**
+*.png**
+*.buffer**
+*.pyc**
+*.jpg**
+*.tfrecord**
