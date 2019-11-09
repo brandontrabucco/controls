@@ -95,7 +95,7 @@ def kf_update(
             measurement_jacobian,
             transpose_b=True))
 
-    inverse_innovation_covariance = tf.linalg.pinv(innovation_covariance)
+    inverse_innovation_covariance = tf.linalg.inv(innovation_covariance)
 
     # compute the kalman gain
 
@@ -116,14 +116,15 @@ def kf_update(
 
     # compute the log likelihood of the measurement
 
-    log_prob_normalizer = tf.log(2. * np.pi) * measurement_dim + tf.linalg.logdet(
-        innovation_covariance)
+    log_prob_normalizer = tf.math.log(2. * np.pi) * tf.cast(
+        measurement_dim, innovation_covariance.dtype) + tf.linalg.logdet(
+            innovation_covariance)
 
     log_prob = -1. / 2. * (log_prob_normalizer + tf.matmul(
         innovation,
         tf.matmul(
             inverse_innovation_covariance,
-            innovation), transpose_a=True))
+            innovation), transpose_a=True)[:, 0, 0])
 
     return (
         predicted_mean,

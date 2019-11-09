@@ -75,7 +75,7 @@ def kf_smooth(
         tf.matmul(
             covariance,
             dynamics_state_jacobian,
-            transpose_b=True), tf.linalg.pinv(next_predicted_covariance))
+            transpose_b=True), tf.linalg.inv(next_predicted_covariance))
 
     # compute the smoothed estimates
 

@@ -54,6 +54,8 @@ def kf(
 
     # record the batch shape, vector sizes and horizon length
 
+    dtype = initial_mean.dtype
+
     measurement_dim = tf.shape(measurements)[-2]
     state_dim = tf.shape(initial_mean)[-2]
     controls_dim = tf.shape(controls)[-2]
@@ -163,17 +165,17 @@ def kf(
 
     # create the loop variables
 
-    predicted_mean_array = tf.TensorArray(horizon)
+    predicted_mean_array = tf.TensorArray(dtype, size=horizon)
 
-    predicted_covariance_array = tf.TensorArray(horizon)
+    predicted_covariance_array = tf.TensorArray(dtype, size=horizon)
 
-    innovation_array = tf.TensorArray(horizon)
+    innovation_array = tf.TensorArray(dtype, size=horizon)
 
-    innovation_covariance_array = tf.TensorArray(horizon)
+    innovation_covariance_array = tf.TensorArray(dtype, size=horizon)
 
-    mean_array = tf.TensorArray(horizon)
+    mean_array = tf.TensorArray(dtype, size=horizon)
 
-    covariance_array = tf.TensorArray(horizon)
+    covariance_array = tf.TensorArray(dtype, size=horizon)
 
     log_prob = 0.0
 
@@ -223,17 +225,16 @@ def kf(
     covariance = tf.transpose(
         filter_results[14].stack(), [1, 0, 2, 3])
 
-    log_prob = tf.transpose(
-        filter_results[15], [1, 0])
+    log_prob = filter_results[15]
 
     # create loop variables for smoothing
 
-    smooth_gain_array = tf.TensorArray(horizon - 1)
+    smooth_gain_array = tf.TensorArray(dtype, size=horizon - 1)
 
-    smooth_mean_array = tf.TensorArray(horizon).write(
+    smooth_mean_array = tf.TensorArray(dtype, size=horizon).write(
         horizon - 1, mean[:, -1, :, :])
 
-    smooth_covariance_array = tf.TensorArray(horizon).write(
+    smooth_covariance_array = tf.TensorArray(dtype, size=horizon).write(
         horizon - 1, covariance[:, -1, :, :])
 
     time = horizon - 2
@@ -268,9 +269,9 @@ def kf(
 
     # create loop variables for em
 
-    dynamics_covariance_array = tf.TensorArray(horizon - 2)
+    dynamics_covariance_array = tf.TensorArray(dtype, size=horizon - 2)
 
-    measurement_covariance_array = tf.TensorArray(horizon - 2)
+    measurement_covariance_array = tf.TensorArray(dtype, size=horizon - 2)
 
     time = horizon - 3
 
@@ -307,7 +308,7 @@ def kf(
 
     predicted_mean = tf.reshape(
         predicted_mean,
-        tf.concat([batch_shape, [horizon, state_dim]], 0))
+        tf.concat([batch_shape, [horizon, state_dim, 1]], 0))
 
     predicted_covariance = tf.reshape(
         predicted_covariance,
@@ -315,7 +316,7 @@ def kf(
 
     innovation = tf.reshape(
         innovation,
-        tf.concat([batch_shape, [horizon, measurement_dim]], 0))
+        tf.concat([batch_shape, [horizon, measurement_dim, 1]], 0))
 
     innovation_covariance = tf.reshape(
         innovation_covariance,
@@ -323,7 +324,7 @@ def kf(
 
     mean = tf.reshape(
         mean,
-        tf.concat([batch_shape, [horizon, state_dim]], 0))
+        tf.concat([batch_shape, [horizon, state_dim, 1]], 0))
 
     covariance = tf.reshape(
         covariance,
@@ -331,15 +332,15 @@ def kf(
 
     log_prob = tf.reshape(
         log_prob,
-        tf.concat([batch_shape, [horizon]], 0))
+        batch_shape)
 
     smooth_gain = tf.reshape(
         smooth_gain,
-        tf.concat([batch_shape, [horizon, state_dim, state_dim]], 0))
+        tf.concat([batch_shape, [horizon - 1, state_dim, state_dim]], 0))
 
     smooth_mean = tf.reshape(
         smooth_mean,
-        tf.concat([batch_shape, [horizon, state_dim]], 0))
+        tf.concat([batch_shape, [horizon, state_dim, 1]], 0))
 
     smooth_covariance = tf.reshape(
         smooth_covariance,
