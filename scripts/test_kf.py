@@ -7,15 +7,15 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    batch_dim = 10
+    batch_dim = 1
     horizon = 20
     state_dim = 32
-    measurement_dim = 24
-    controls_dim = 7
+    measurement_dim = state_dim
+    controls_dim = state_dim
 
     A = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
-    B = tf.random.normal([batch_dim, horizon, state_dim, controls_dim])
-    C = tf.random.normal([batch_dim, horizon, measurement_dim, state_dim])
+    B = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
+    C = tf.eye(state_dim, batch_shape=[batch_dim, horizon])
 
     states = [
         tf.random.normal([batch_dim, 1, state_dim, 1])]
@@ -45,21 +45,27 @@ if __name__ == "__main__":
     measurements = tf.concat(measurements, 1)
 
     result = kf(
-        measurements,
+        measurements[:, 1:, :, :],
         tf.zeros([batch_dim, state_dim, 1]),
         tf.eye(state_dim, batch_shape=[batch_dim]),
-        controls,
-        A,
-        B,
+        controls[:, :-1, :, :],
+        A[:, :-1, :, :],
+        B[:, :-1, :, :],
         tf.eye(state_dim, batch_shape=[batch_dim]) * 0.01,
-        C,
+        C[:, :-1, :, :],
         tf.eye(measurement_dim, batch_shape=[batch_dim]) * 0.01)
 
-    error = tf.linalg.norm(result[0] - states, ord=1)
+    error = tf.linalg.norm(result[0] - states[:, 1:, :, :], ord=1)
     print("error prediction", error.numpy())
 
-    error = tf.linalg.norm(result[4] - states, ord=1)
+    error = tf.linalg.norm(result[4] - states[:, 1:, :, :], ord=1)
     print("error filter", error.numpy())
 
-    error = tf.linalg.norm(result[8] - states, ord=1)
+    error = tf.linalg.norm(result[8] - states[:, 1:, :, :], ord=1)
     print("error smooth", error.numpy())
+
+    for t in range(horizon - 1):
+        print(tf.linalg.norm(result[0][0, t, ...] - states[0, t + 1, ...], ord=1).numpy())
+        print(tf.linalg.norm(result[4][0, t, ...] - states[0, t + 1, ...], ord=1).numpy())
+        print()
+

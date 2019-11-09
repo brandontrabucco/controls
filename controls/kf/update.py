@@ -95,7 +95,8 @@ def kf_update(
             measurement_jacobian,
             transpose_b=True))
 
-    inverse_innovation_covariance = tf.linalg.inv(innovation_covariance)
+    inverse_innovation_covariance = tf.linalg.inv(
+        innovation_covariance)
 
     # compute the kalman gain
 
@@ -104,6 +105,8 @@ def kf_update(
             predicted_covariance,
             measurement_jacobian,
             transpose_b=True), inverse_innovation_covariance)
+
+    print("gain", gain)
 
     # compute the bayes optimal state estimate
 
@@ -115,6 +118,8 @@ def kf_update(
             measurement_jacobian), predicted_covariance)
 
     # compute the log likelihood of the measurement
+
+    print(innovation_covariance, covariance, predicted_covariance)
 
     log_prob_normalizer = tf.math.log(2. * np.pi) * tf.cast(
         measurement_dim, innovation_covariance.dtype) + tf.linalg.logdet(
@@ -173,6 +178,10 @@ def kf_loop_body(
 
     # push the results into arrays for safe keeping
 
+    mean = update_result[4]
+
+    covariance = update_result[5]
+
     predicted_mean_array = predicted_mean_array.write(
         time, update_result[0])
 
@@ -186,10 +195,10 @@ def kf_loop_body(
         time, update_result[3])
 
     mean_array = mean_array.write(
-        time, update_result[4])
+        time, mean)
 
     covariance_array = covariance_array.write(
-        time, update_result[5])
+        time, covariance)
 
     log_prob = log_prob + update_result[6]
 
