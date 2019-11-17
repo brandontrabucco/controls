@@ -7,27 +7,21 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    batch_dim = 1
-    horizon = 20
-    state_dim = 32
-    measurement_dim = state_dim
-    controls_dim = state_dim
-
-    A = tf.random.normal([batch_dim, horizon, state_dim, state_dim])
-    B = tf.random.normal([batch_dim, horizon, state_dim, controls_dim])
-    C = tf.random.normal([batch_dim, horizon, measurement_dim, state_dim])
+    A = tf.constant([[[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0]]])
+    B = tf.constant([[[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]])
+    C = tf.constant([[[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]]])
 
     states = [
-        tf.random.normal([batch_dim, 1, state_dim, 1])]
+        tf.random.normal([1, 1, 3, 1])]
 
     controls = [
-        tf.random.normal([batch_dim, 1, controls_dim, 1])]
+        tf.random.normal([1, 1, 2, 1])]
 
     measurements = [
         C[:, 0:1, :, :] @ states[-1] +
-        tf.random.normal([batch_dim, 1, measurement_dim, 1]) * 0.01]
+        tf.random.normal([1, 1, 2, 1]) * 0.01]
 
-    for i in range(1, horizon):
+    for i in range(1, 10):
 
         states.append(
             A[:, i:i+1, :, :] @ states[-1] +
