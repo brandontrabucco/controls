@@ -36,8 +36,10 @@ def lqr_update(
 
     # get the batch shape and vector sizes
 
-    controls_dim = tf.shape(dynamics_controls_jacobian)[2]
-    state_dim = tf.shape(dynamics_state_jacobian)[2]
+    controls_dim = tf.shape(dynamics_controls_jacobian)[-1]
+
+    state_dim = tf.shape(dynamics_state_jacobian)[-1]
+
     batch_dim = tf.shape(value_hessian)[0]
 
     # make sure all inputs are 3 tensors
@@ -98,52 +100,52 @@ def lqr_update(
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(value_hessian)[1],
+        tf.shape(value_hessian)[-2],
         message="value_hessian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(value_hessian)[2],
+        tf.shape(value_hessian)[-1],
         message="value_hessian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(dynamics_state_jacobian)[1],
+        tf.shape(dynamics_state_jacobian)[-2],
         message="dynamics_state_jacobian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(dynamics_state_jacobian)[2],
+        tf.shape(dynamics_state_jacobian)[-1],
         message="dynamics_state_jacobian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(dynamics_controls_jacobian)[1],
+        tf.shape(dynamics_controls_jacobian)[-2],
         message="dynamics_controls_jacobian should have shape [batch_sim, state_dim, controls_dim]")
 
     tf.debugging.assert_equal(
         controls_dim,
-        tf.shape(dynamics_controls_jacobian)[2],
+        tf.shape(dynamics_controls_jacobian)[-1],
         message="dynamics_controls_jacobian should have shape [batch_sim, state_dim, controls_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(cost_state_hessian)[1],
+        tf.shape(cost_state_hessian)[-2],
         message="cost_state_hessian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         state_dim,
-        tf.shape(cost_state_hessian)[2],
+        tf.shape(cost_state_hessian)[-1],
         message="cost_state_hessian should have shape [batch_sim, state_dim, state_dim]")
 
     tf.debugging.assert_equal(
         controls_dim,
-        tf.shape(cost_controls_hessian)[1],
+        tf.shape(cost_controls_hessian)[-2],
         message="cost_controls_hessian should have shape [batch_sim, controls_dim, controls_dim]")
 
     tf.debugging.assert_equal(
         controls_dim,
-        tf.shape(cost_controls_hessian)[2],
+        tf.shape(cost_controls_hessian)[-1],
         message="cost_controls_hessian should have shape [batch_sim, controls_dim, controls_dim]")
 
     # calculate the optimal control gain for the current state
@@ -153,8 +155,9 @@ def lqr_update(
         value_hessian, transpose_a=True)
 
     controls_state_jacobian = -tf.matmul(
-        tf.linalg.inv(cost_controls_hessian + tf.matmul(b_transpose_p, dynamics_controls_jacobian)),
-        tf.matmul(b_transpose_p, dynamics_state_jacobian))
+        tf.linalg.inv(cost_controls_hessian + tf.matmul(
+            b_transpose_p, dynamics_controls_jacobian)), tf.matmul(
+                b_transpose_p, dynamics_state_jacobian))
 
     # calculate the optimal cost to go hessian at the current state
 
@@ -164,7 +167,8 @@ def lqr_update(
 
     value_hessian = cost_state_hessian + tf.matmul(
         tf.matmul(controls_state_jacobian, cost_controls_hessian, transpose_a=True),
-        controls_state_jacobian) + tf.matmul(tf.matmul(a_plus_bk, value_hessian, transpose_a=True), a_plus_bk)
+        controls_state_jacobian) + tf.matmul(
+            tf.matmul(a_plus_bk, value_hessian, transpose_a=True), a_plus_bk)
 
     return (
         controls_state_jacobian,

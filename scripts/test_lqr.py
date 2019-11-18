@@ -5,41 +5,44 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    A = tf.constant([[
+    A = tf.constant([[[
         [-0.313, 56.7, 0.0],
         [-0.0139, -0.426, 0.0],
-        [0.0, 56.7, 0.0]]])
+        [0.0, 56.7, 0.0]]]])
 
-    B = tf.constant([[
+    A = tf.tile(A, [100, 1, 1, 1])
+
+    B = tf.constant([[[
         [0.232],
         [0.0203],
-        [0.0]]])
+        [0.0]]]])
 
-    Q = tf.constant([[
+    B = tf.tile(B, [100, 1, 1, 1])
+
+    Q = tf.constant([[[
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0]]])
+        [0.0, 0.0, 1.0]]]])
 
-    R = tf.constant([[
-        [1.0]]])
+    Q = tf.tile(Q, [100, 1, 1, 1])
 
-    K, P = lqr(
-        A,
-        B,
-        Q,
-        R,
-        horizon=100)
+    R = tf.constant([[[
+        [1.0]]]])
+
+    R = tf.tile(R, [100, 1, 1, 1])
+
+    K, P = lqr(A, B, Q, R)
 
     states = tf.random.normal([1, 3, 1])
 
     for i in range(100):
 
-        controls = K @ states
+        controls = K[i, :, :, :] @ states
 
         costs = (
-            tf.matmul(tf.matmul(states, Q, transpose_a=True), states) +
-            tf.matmul(tf.matmul(controls, R, transpose_a=True), controls))
+            tf.matmul(tf.matmul(states, Q[i, :, :, :], transpose_a=True), states) +
+            tf.matmul(tf.matmul(controls, R[i, :, :, :], transpose_a=True), controls))
 
         print("Cost: {}".format(costs.numpy().sum()))
 
-        states = A @ states + B @ controls
+        states = A[i, :, :, :] @ states + B[i, :, :, :] @ controls
