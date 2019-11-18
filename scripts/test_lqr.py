@@ -31,13 +31,22 @@ if __name__ == "__main__":
 
     R = tf.tile(R, [100, 1, 1, 1])
 
-    K, P = lqr(A, B, Q, R)
+    K, k, P, p = lqr(
+        A,
+        B,
+        tf.zeros([100, 1, 3, 1]),
+        Q,
+        tf.zeros([100, 1, 3, 1]),
+        tf.zeros([100, 1, 1, 3]),
+        R,
+        tf.zeros([100, 1, 3, 1]),
+        tf.zeros([100, 1, 1, 1]))
 
     states = tf.random.normal([1, 3, 1])
 
     for i in range(100):
 
-        controls = K[i, :, :, :] @ states
+        controls = K[i, :, :, :] @ states + k[i, :, :, :]
 
         costs = (
             tf.matmul(tf.matmul(states, Q[i, :, :, :], transpose_a=True), states) +
