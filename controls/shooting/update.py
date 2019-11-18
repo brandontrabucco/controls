@@ -128,8 +128,7 @@ def create_shooting_update(
 
         dynamics_controls_jacobian = tape.batch_jacobian(predicted_states, controls)[:, :, 0, :, 0]
 
-        dynamics_shift = predicted_states - tf.matmul(
-            dynamics_state_jacobian, states) - tf.matmul(dynamics_controls_jacobian, controls)
+        dynamics_shift = predicted_states
 
         cost_state_state_hessian = tape.batch_jacobian(
             cost_state_jacobian, states)[:, :, 0, :, 0]
@@ -143,30 +142,7 @@ def create_shooting_update(
         cost_controls_controls_hessian = tape.batch_jacobian(
             cost_controls_jacobian, controls)[:, :, 0, :, 0]
 
-        C_one = tf.matmul(
-            tf.matmul(states, cost_state_state_hessian, transpose_a=True),
-            states)
-
-        C_two = tf.matmul(
-            tf.matmul(states, cost_state_controls_hessian, transpose_a=True),
-            controls)
-
-        C_three = tf.matmul(
-            tf.matmul(controls, cost_controls_state_hessian, transpose_a=True),
-            states)
-
-        C_four = tf.matmul(
-            tf.matmul(controls, cost_controls_controls_hessian, transpose_a=True),
-            controls)
-
-        C_five = tf.matmul(
-            states, cost_state_jacobian, transpose_a=True)
-
-        C_six = tf.matmul(
-            controls, cost_controls_jacobian, transpose_a=True)
-
-        cost_shift = costs - 0.5 * (
-            C_one + C_two + C_three + C_four) - C_five - C_six
+        cost_shift = costs
 
         return (
             predicted_states,

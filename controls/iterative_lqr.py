@@ -3,6 +3,7 @@
 
 from controls.lqr.lqr import lqr
 from controls.shooting.shooting import shooting
+from controls.create_time_varying_linear_model import create_time_varying_linear_model
 import tensorflow as tf
 
 
@@ -64,9 +65,7 @@ def iterative_lqr(
 
     batch_shape = tf.shape(initial_states)[1:-2]
 
-    batch_dim = tf.reduce_prod(batch_shape)
-
-    state_dim = initial_states.shape[-2]
+    state_dim = tf.shape(initial_states)[-2]
 
     # create the initial loop variables
 
@@ -86,118 +85,35 @@ def iterative_lqr(
 
     for i in range(num_iterations):
 
-        # create a policy to use with the shooting algorithm
-
-        states = tf.reshape(
-            states, [horizon, batch_dim, state_dim, 1])
-
-        controls = tf.reshape(
-            controls, [horizon, batch_dim, controls_dim, 1])
-
-        controls_state_jacobian = tf.reshape(
-            controls_state_jacobian, [horizon, batch_dim, controls_dim, state_dim])
-
-        controls_shift = tf.reshape(
-            controls_shift, [horizon, batch_dim, controls_dim, 1])
-
-        time = -2
-
-        def controls_model(
-                x
-        ):
-            """Compute the optimal policy using lqr."""
-
-            nonlocal time
-
-            time += 1
-
-            return controls[time, ...] + controls_shift[time, ...] + tf.matmul(
-                controls_state_jacobian[time, ...],
-                x[0] - states[time, ...])
-
-        inputs = tf.keras.layers.Input(shape=(state_dim, 1))
-
-        outputs = tf.keras.layers.Lambda(controls_model)(inputs)
-
-        controls_model = tf.keras.Model(inputs=inputs, outputs=outputs)
-
         # run a forward pass using the shooting algorithm
 
-        (states,
-            controls,
-            costs,
-            dynamics_state_jacobian,
-            dynamics_controls_jacobian,
-            dynamics_shift,
-            cost_state_state_hessian,
-            cost_state_controls_hessian,
-            cost_controls_state_hessian,
-            cost_controls_controls_hessian,
-            cost_state_jacobian,
-            cost_controls_jacobian,
-            cost_shift) = shooting(
-                initial_states,
-                controls_model,
-                dynamics_model,
-                cost_model,
-                horizon)
+        states, controls, costs, *rest = shooting(
+            initial_states,
+            create_time_varying_linear_model(
+                states,
+                controls,
+                controls_state_jacobian,
+                controls_shift),
+            dynamics_model,
+            cost_model,
+            horizon)
 
         # run a backward pass using the linear quadratic regulator
 
         (controls_state_jacobian,
             controls_shift,
             value_state_state_hessian,
-            value_state_jacobian) = lqr(
-                dynamics_state_jacobian,
-                dynamics_controls_jacobian,
-                dynamics_shift,
-                cost_state_state_hessian,
-                cost_state_controls_hessian,
-                cost_controls_state_hessian,
-                cost_controls_controls_hessian,
-                cost_state_jacobian,
-                cost_controls_jacobian)
-
-    # create a policy to use with the shooting algorithm
-
-    states = tf.reshape(
-        states, [horizon, batch_dim, state_dim, 1])
-
-    controls = tf.reshape(
-        controls, [horizon, batch_dim, controls_dim, 1])
-
-    controls_state_jacobian = tf.reshape(
-        controls_state_jacobian, [horizon, batch_dim, controls_dim, state_dim])
-
-    controls_shift = tf.reshape(
-        controls_shift, [horizon, batch_dim, controls_dim, 1])
-
-    time = -2
-
-    def controls_model(
-            x
-    ):
-        """Compute the optimal policy using lqr."""
-
-        nonlocal time
-
-        time += 1
-
-        return controls[time, ...] + controls_shift[time, ...] + tf.matmul(
-            controls_state_jacobian[time, ...],
-            x[0] - states[time, ...])
-
-    inputs = tf.keras.layers.Input(shape=(state_dim, 1))
-
-    outputs = tf.keras.layers.Lambda(controls_model)(inputs)
-
-    controls_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+            value_state_jacobian) = lqr(*rest[:-1])
 
     # run a forward pass using the shooting algorithm
 
     return shooting(
             initial_states,
-            controls_model,
+            create_time_varying_linear_model(
+                states,
+                controls,
+                controls_state_jacobian,
+                controls_shift),
             dynamics_model,
             cost_model,
             horizon)
