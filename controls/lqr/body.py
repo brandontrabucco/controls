@@ -5,8 +5,6 @@ from controls.lqr.update import lqr_update
 
 
 def lqr_body(
-        controls_state_jacobian,
-        controls_shift,
         value_state_state_hessian,
         value_state_jacobian,
         dynamics_state_jacobian,
@@ -67,8 +65,6 @@ def lqr_body(
     time = time - 1
 
     return (
-        controls_state_jacobian,
-        controls_shift,
         value_state_state_hessian,
         value_state_jacobian,
         dynamics_state_jacobian,

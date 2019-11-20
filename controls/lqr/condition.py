@@ -5,8 +5,6 @@ import tensorflow as tf
 
 
 def lqr_condition(
-        controls_state_jacobian,
-        controls_shift,
         value_state_state_hessian,
         value_state_jacobian,
         dynamics_state_jacobian,

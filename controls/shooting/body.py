@@ -21,16 +21,6 @@ def create_shooting_body(
             states_array,
             controls_array,
             costs_array,
-            dynamics_state_jacobian_array,
-            dynamics_controls_jacobian_array,
-            dynamics_shift_array,
-            cost_state_state_hessian_array,
-            cost_state_controls_hessian_array,
-            cost_controls_state_hessian_array,
-            cost_controls_controls_hessian_array,
-            cost_state_jacobian_array,
-            cost_controls_jacobian_array,
-            cost_shift_array,
             time,
             horizon
     ):
@@ -53,36 +43,6 @@ def create_shooting_body(
         costs_array = costs_array.write(
             time, update_result[2])
 
-        dynamics_state_jacobian_array = dynamics_state_jacobian_array.write(
-            time, update_result[3])
-
-        dynamics_controls_jacobian_array = dynamics_controls_jacobian_array.write(
-            time, update_result[4])
-
-        dynamics_shift_array = dynamics_shift_array.write(
-            time, update_result[5])
-
-        cost_state_state_hessian_array = cost_state_state_hessian_array.write(
-            time, update_result[6])
-
-        cost_state_controls_hessian_array = cost_state_controls_hessian_array.write(
-            time, update_result[7])
-
-        cost_controls_state_hessian_array = cost_controls_state_hessian_array.write(
-            time, update_result[8])
-
-        cost_controls_controls_hessian_array = cost_controls_controls_hessian_array.write(
-            time, update_result[9])
-
-        cost_state_jacobian_array = cost_state_jacobian_array.write(
-            time, update_result[10])
-
-        cost_controls_jacobian_array = cost_controls_jacobian_array.write(
-            time, update_result[11])
-
-        cost_shift_array = cost_shift_array.write(
-            time, update_result[12])
-
         time = time + 1
 
         return (
@@ -90,16 +50,6 @@ def create_shooting_body(
             states_array,
             controls_array,
             costs_array,
-            dynamics_state_jacobian_array,
-            dynamics_controls_jacobian_array,
-            dynamics_shift_array,
-            cost_state_state_hessian_array,
-            cost_state_controls_hessian_array,
-            cost_controls_state_hessian_array,
-            cost_controls_controls_hessian_array,
-            cost_state_jacobian_array,
-            cost_controls_jacobian_array,
-            cost_shift_array,
             time,
             horizon)
 

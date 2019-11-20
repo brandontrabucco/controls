@@ -285,12 +285,6 @@ def lqr(
 
     # create the loop variables
 
-    initial_controls_state_jacobian = tf.zeros(
-        [batch_dim, controls_dim, state_dim], dtype=dtype)
-
-    initial_controls_shift = tf.zeros(
-        [batch_dim, controls_dim, 1], dtype=dtype)
-
     initial_value_state_state_hessian = tf.zeros(
         [batch_dim, state_dim, state_dim], dtype=dtype)
 
@@ -312,8 +306,6 @@ def lqr(
     lqr_results = tf.while_loop(
         lqr_condition,
         lqr_body, (
-            initial_controls_state_jacobian,
-            initial_controls_shift,
             initial_value_state_state_hessian,
             initial_value_state_jacobian,
             dynamics_state_jacobian,
@@ -335,19 +327,19 @@ def lqr(
     # collect the outputs and make sure they are the correct shape
 
     controls_state_jacobian = tf.reshape(
-        lqr_results[13].stack(),
+        lqr_results[11].stack(),
         tf.concat([[horizon], batch_shape, [controls_dim, state_dim]], 0))
 
     controls_shift = tf.reshape(
-        lqr_results[14].stack(),
+        lqr_results[12].stack(),
         tf.concat([[horizon], batch_shape, [controls_dim, 1]], 0))
 
     value_state_state_hessian = tf.reshape(
-        lqr_results[15].stack(),
+        lqr_results[13].stack(),
         tf.concat([[horizon], batch_shape, [state_dim, state_dim]], 0))
 
     value_state_jacobian = tf.reshape(
-        lqr_results[16].stack(),
+        lqr_results[14].stack(),
         tf.concat([[horizon], batch_shape, [state_dim, 1]], 0))
 
     return (

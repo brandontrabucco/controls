@@ -13,13 +13,13 @@ def create_shooting_update(
 
     Args:
     - states: the current state with shape [batch_dim, state_dim, 1].
-    - controls_model: the controls as a tensorflow.keras.Model.
-        the model returns tensors with shape [batch_dim, controls_dim, 1].
+    - controls_model: the controls as a function.
+        the function returns tensors with shape [batch_dim, controls_dim, 1].
 
-    - dynamics_model: the dynamics as a tensorflow.keras.Model.
+    - dynamics_model: the dynamics as function.
         the model returns tensors with shape [batch_dim, state_dim, 1].
-    - cost_model: the cost as a tensorflow.keras.Model.
-        the model returns tensors with shape [batch_dim, 1, 1].
+    - cost_model: the cost as a function.
+        the function returns tensors with shape [batch_dim, 1, 1].
 
     Returns:
     - a function shooting_update
@@ -37,31 +37,6 @@ def create_shooting_update(
         - predicted_states: the next state with shape [batch_dim, state_dim, 1].
         - controls: the controls with shape [batch_dim, controls_dim, 1].
         - costs: the costs with shape [batch_dim, 1, 1].
-
-        - dynamics_state_jacobian: the jacobian of the dynamics wrt. state i
-            with shape [batch_dim, state_dim, state_dim].
-        - dynamics_controls_jacobian: the jacobian of the dynamics wrt. controls i
-            with shape [batch_dim, state_dim, controls_dim].
-
-        - dynamics_shift: the shift term of the dynamics
-            with shape [batch_dim, state_dim, 1].
-
-        - cost_state_state_hessian: the hessian of the cost wrt. state i state j
-            with shape [batch_dim, state_dim, state_dim].
-        - cost_state_controls_hessian: the hessian of the cost wrt. state i controls j
-            with shape [batch_dim, state_dim, controls_dim].
-        - cost_controls_state_hessian: the hessian of the cost wrt. controls i state j
-            with shape [batch_dim, controls_dim, state_dim].
-        - cost_controls_controls_hessian: the hessian of the cost wrt. controls i controls j
-            with shape [batch_dim, controls_dim, controls_dim].
-
-        - cost_state_jacobian: the jacobian of the cost wrt. state i
-            with shape [batch_dim, state_dim, 1].
-        - cost_controls_jacobian: the jacobian of the cost wrt. controls i
-            with shape [batch_dim, controls_dim, 1].
-
-        - cost_shift: the shift term of the cost
-            with shape [batch_dim, 1, 1].
             """
 
         tf.debugging.assert_equal(
@@ -76,87 +51,45 @@ def create_shooting_update(
 
         # calculate the controls and the next state using the dynamics
 
-        with tf.GradientTape(persistent=True) as tape:
+        controls = controls_model([states])
 
-            tape.watch(states)
+        tf.debugging.assert_equal(
+            3,
+            tf.size(tf.shape(controls)),
+            message="controls should be a 3 tensor")
 
-            controls = controls_model([states])
+        tf.debugging.assert_equal(
+            1,
+            tf.shape(controls)[-1],
+            message="controls should have shape [batch_dim, controls_dim, 1]")
 
-            tf.debugging.assert_equal(
-                3,
-                tf.size(tf.shape(controls)),
-                message="controls should be a 3 tensor")
+        predicted_states = dynamics_model([states, controls])
 
-            tf.debugging.assert_equal(
-                1,
-                tf.shape(controls)[-1],
-                message="controls should have shape [batch_dim, controls_dim, 1]")
+        tf.debugging.assert_equal(
+            3,
+            tf.size(tf.shape(predicted_states)),
+            message="predicted_states should be a 3 tensor")
 
-            tape.watch(controls)
+        tf.debugging.assert_equal(
+            1,
+            tf.shape(predicted_states)[-1],
+            message="predicted_states should have shape [batch_dim, state_dim, 1]")
 
-            predicted_states = dynamics_model([states, controls])
+        costs = cost_model([states, controls])
 
-            tf.debugging.assert_equal(
-                3,
-                tf.size(tf.shape(predicted_states)),
-                message="predicted_states should be a 3 tensor")
+        tf.debugging.assert_equal(
+            3,
+            tf.size(tf.shape(costs)),
+            message="costs should be a 3 tensor")
 
-            tf.debugging.assert_equal(
-                1,
-                tf.shape(predicted_states)[-1],
-                message="predicted_states should have shape [batch_dim, state_dim, 1]")
-
-            costs = cost_model([states, controls])
-
-            tf.debugging.assert_equal(
-                3,
-                tf.size(tf.shape(costs)),
-                message="costs should be a 3 tensor")
-
-            tf.debugging.assert_equal(
-                [1, 1],
-                tf.shape(costs)[1:],
-                message="costs should have shape [batch_dim, 1, 1]")
-
-            cost_state_jacobian = tape.gradient(costs, states)
-
-            cost_controls_jacobian = tape.gradient(costs, controls)
-
-        # calculate the linearized dynamics
-
-        dynamics_state_jacobian = tape.batch_jacobian(predicted_states, states)[:, :, 0, :, 0]
-
-        dynamics_controls_jacobian = tape.batch_jacobian(predicted_states, controls)[:, :, 0, :, 0]
-
-        dynamics_shift = predicted_states
-
-        cost_state_state_hessian = tape.batch_jacobian(
-            cost_state_jacobian, states)[:, :, 0, :, 0]
-
-        cost_state_controls_hessian = tape.batch_jacobian(
-            cost_state_jacobian, controls)[:, :, 0, :, 0]
-
-        cost_controls_state_hessian = tape.batch_jacobian(
-            cost_controls_jacobian, states)[:, :, 0, :, 0]
-
-        cost_controls_controls_hessian = tape.batch_jacobian(
-            cost_controls_jacobian, controls)[:, :, 0, :, 0]
-
-        cost_shift = costs
+        tf.debugging.assert_equal(
+            [1, 1],
+            tf.shape(costs)[1:],
+            message="costs should have shape [batch_dim, 1, 1]")
 
         return (
             predicted_states,
             controls,
-            costs,
-            dynamics_state_jacobian,
-            dynamics_controls_jacobian,
-            dynamics_shift,
-            cost_state_state_hessian,
-            cost_state_controls_hessian,
-            cost_controls_state_hessian,
-            cost_controls_controls_hessian,
-            cost_state_jacobian,
-            cost_controls_jacobian,
-            cost_shift)
+            costs)
 
     return shooting_update

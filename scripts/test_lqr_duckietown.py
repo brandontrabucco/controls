@@ -25,8 +25,6 @@ if __name__ == "__main__":
 
     states = tf.random.normal([1, 3, 1])
 
-    costs_list = []
-
     for i in range(100):
 
         controls = K @ states
@@ -37,4 +35,3 @@ if __name__ == "__main__":
         states = A @ states + B @ controls
 
         print("Cost: {}".format(costs.numpy().sum()))
-        costs_list.append(costs.numpy().sum())
