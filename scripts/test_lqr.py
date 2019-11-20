@@ -2,6 +2,8 @@
 
 
 from controls import infinite_horizon_lqr
+from controls.time_varying_linear_model import time_varying_linear_model
+from controls.shooting.shooting import shooting
 import tensorflow as tf
 
 
@@ -23,18 +25,41 @@ if __name__ == "__main__":
 
     K, P = infinite_horizon_lqr(A, B, Q, R)
 
+    def dynamics(x):
+        return A @ x[0] + B @ x[1]
+
+    def cost(x):
+        return 0.5 * tf.matmul(
+            tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
+            tf.matmul(x[1], R, transpose_a=True), x[1])
+
     states = tf.random.normal([1, 3, 1])
+
+    policy = time_varying_linear_model(
+        tf.zeros([100, 1, 3, 1]),
+        tf.zeros([100, 1, 1, 1]),
+        tf.tile(K[None, ...], [100, 1, 1, 1]),
+        tf.zeros([100, 1, 1, 1]))
+
+    shooting_states, shooting_controls, shooting_costs = shooting(
+        states, policy, dynamics, cost, 100)
+
+    policy = time_varying_linear_model(
+        tf.zeros([100, 1, 3, 1]),
+        tf.zeros([100, 1, 1, 1]),
+        tf.tile(K[None, ...], [100, 1, 1, 1]),
+        tf.zeros([100, 1, 1, 1]))
 
     costs_list = []
 
     for i in range(100):
 
-        controls = K @ states
+        controls = policy(states)
 
-        costs = (tf.matmul(tf.matmul(states, Q, transpose_a=True), states) +
-                 tf.matmul(tf.matmul(controls, R, transpose_a=True), controls))
+        costs = 0.5 * (tf.matmul(tf.matmul(states, Q, transpose_a=True), states) +
+                       tf.matmul(tf.matmul(controls, R, transpose_a=True), controls))
 
         states = A @ states + B @ controls
 
-        print("Cost: {}".format(costs.numpy().sum()))
-        costs_list.append(costs.numpy().sum())
+        print("Cost: {} Shooting Costs: {}".format(
+            costs.numpy()[0][0][0], shooting_costs[i].numpy()[0][0][0]))

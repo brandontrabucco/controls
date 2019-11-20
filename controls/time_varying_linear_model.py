@@ -4,13 +4,13 @@
 import tensorflow as tf
 
 
-def create_time_varying_linear_model(
+def time_varying_linear_model(
         inputs,
         outputs,
         jacobian,
         shift,
 ):
-    """Create a keras model for a time varying linear taylor approximation."""
+    """Create a function for a time varying linear model."""
 
     # get the batch shape and vector sizes
 
@@ -52,7 +52,7 @@ def create_time_varying_linear_model(
         tf.debugging.assert_less(
             time,
             horizon,
-            message="cannot use time varying linear model beyond horizon")
+            message="cannot use model beyond original horizon")
 
         return outputs[time, ...] + shift[time, ...] + tf.matmul(
             jacobian[time, ...], x[0] - inputs[time, ...])
