@@ -3,7 +3,7 @@
 
 from controls.lqr.lqr import lqr
 from controls.shooting.shooting import shooting
-from controls.time_varying_linear_model import time_varying_linear_model
+from controls.time_varying_linear import time_varying_linear
 from controls.taylor_series import first_order
 from controls.taylor_series import second_order
 import tensorflow as tf
@@ -24,10 +24,10 @@ def iterative_lqr(
         with shape [batch_dim, ..., state_dim, 1].
     - controls_dim: the cardinality of the controls variable.
 
-    - dynamics_model: the dynamics as a tensorflow.keras.Model.
-        the model returns tensors with shape [batch_dim, state_dim, 1].
-    - cost_model: the cost as a tensorflow.keras.Model.
-        the model returns tensors with shape [batch_dim, 1, 1].
+    - dynamics_model: the dynamics as a function.
+        the function returns tensors with shape [batch_dim, state_dim, 1].
+    - cost_model: the cost as a function.
+        the function returns tensors with shape [batch_dim, 1, 1].
 
     - horizon: the number of steps into the future for the planner.
     - num_iterations: the number of iterations to run.
@@ -91,11 +91,10 @@ def iterative_lqr(
 
         # update the controls model
 
-        controls_model = time_varying_linear_model(
+        controls_model = time_varying_linear(
             states,
-            controls,
-            controls_state_jacobian,
-            controls_shift)
+            controls + controls_shift,
+            controls_state_jacobian)
 
         # run a forward pass using the shooting algorithm
 
@@ -106,9 +105,13 @@ def iterative_lqr(
             cost_model,
             horizon)
 
-        states = tf.reshape(states, [horizon * batch_dim, state_dim, 1])
+        states = tf.reshape(
+            states,
+            [horizon * batch_dim, state_dim, 1])
 
-        controls = tf.reshape(controls, [horizon * batch_dim, controls_dim, 1])
+        controls = tf.reshape(
+            controls,
+            [horizon * batch_dim, controls_dim, 1])
 
         # linear approximate the dynamics
 
@@ -176,13 +179,20 @@ def iterative_lqr(
                 cost_state_jacobian,
                 cost_controls_jacobian)
 
+        states = tf.reshape(
+            states,
+            tf.concat([[horizon], batch_shape, [state_dim, 1]], 0))
+
+        controls = tf.reshape(
+            controls,
+            tf.concat([[horizon], batch_shape, [controls_dim, 1]], 0))
+
     # update the controls model
 
-    controls_model = time_varying_linear_model(
+    controls_model = time_varying_linear(
         states,
-        controls,
-        controls_state_jacobian,
-        controls_shift)
+        controls + controls_shift,
+        controls_state_jacobian)
 
     # run a forward pass using the shooting algorithm
 

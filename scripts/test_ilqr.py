@@ -27,15 +27,13 @@ if __name__ == "__main__":
             tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
             tf.matmul(x[1], R, transpose_a=True), x[1])
 
-    initial_states = tf.random.normal([1, 3, 1])
-
     results = iterative_lqr(
-        initial_states,
+        tf.random.normal([1, 3, 1]),
         1,
         dynamics_model,
         cost_model,
         100,
-        2)
+        10)
 
     for i in range(100):
 

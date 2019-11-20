@@ -2,7 +2,7 @@
 
 
 from controls import infinite_horizon_lqr
-from controls.time_varying_linear_model import time_varying_linear_model
+from controls.time_varying_linear import time_varying_linear
 from controls.shooting.shooting import shooting
 import tensorflow as tf
 
@@ -35,20 +35,18 @@ if __name__ == "__main__":
 
     states = tf.random.normal([1, 3, 1])
 
-    policy = time_varying_linear_model(
+    policy = time_varying_linear(
         tf.zeros([100, 1, 3, 1]),
         tf.zeros([100, 1, 1, 1]),
-        tf.tile(K[None, ...], [100, 1, 1, 1]),
-        tf.zeros([100, 1, 1, 1]))
+        tf.tile(K[None, ...], [100, 1, 1, 1]))
 
     shooting_states, shooting_controls, shooting_costs = shooting(
         states, policy, dynamics, cost, 100)
 
-    policy = time_varying_linear_model(
+    policy = time_varying_linear(
         tf.zeros([100, 1, 3, 1]),
         tf.zeros([100, 1, 1, 1]),
-        tf.tile(K[None, ...], [100, 1, 1, 1]),
-        tf.zeros([100, 1, 1, 1]))
+        tf.tile(K[None, ...], [100, 1, 1, 1]))
 
     costs_list = []
 
