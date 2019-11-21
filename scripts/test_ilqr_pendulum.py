@@ -24,6 +24,9 @@ if __name__ == "__main__":
 
     R = tf.constant([[[1.0]]])
 
+    def controls_model(x):
+        return tf.zeros([1, 1, 1])
+
     def dynamics_model(x):
         return A @ x[0] + B @ x[1]
 
@@ -34,7 +37,7 @@ if __name__ == "__main__":
 
     results = iterative_lqr(
         tf.random.normal([1, 4, 1]),
-        1,
+        controls_model,
         dynamics_model,
         cost_model,
         20,

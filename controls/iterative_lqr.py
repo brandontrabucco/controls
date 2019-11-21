@@ -11,7 +11,7 @@ import tensorflow as tf
 
 def iterative_lqr(
         initial_states,
-        controls_dim,
+        controls_model,
         dynamics_model,
         cost_model,
         horizon,
@@ -22,8 +22,9 @@ def iterative_lqr(
     Args:
     - initial_states: the initial states from which to predict into the future
         with shape [batch_dim, state_dim, 1].
-    - controls_dim: the cardinality of the controls variable.
 
+    - controls_model: the initial policy as a function.
+        the function returns tensors with shape [batch_dim, controls_dim, 1].
     - dynamics_model: the dynamics as a function.
         the function returns tensors with shape [batch_dim, state_dim, 1].
     - cost_model: the cost as a function.
@@ -76,27 +77,16 @@ def iterative_lqr(
     state_dim = tf.shape(initial_states)[1]
     dtype = initial_states.dtype
 
-    # create the initial loop variables
-
-    states = tf.zeros([horizon, batch_dim, state_dim, 1], dtype=dtype)
-    controls = tf.zeros([horizon, batch_dim, controls_dim, 1], dtype=dtype)
-
-    controls_state_jacobian = tf.zeros([horizon, batch_dim, controls_dim, state_dim], dtype=dtype)
-    controls_shift = tf.zeros([horizon, batch_dim, controls_dim, 1], dtype=dtype)
-
     # iteratively run forward shooting and backward controls optimization with lqr
 
     for i in range(num_iterations):
-
-        # update the controls model
-
-        controls_model = time_varying_linear(
-            controls + controls_shift, [states], [controls_state_jacobian])
 
         # run a forward pass using the shooting algorithm
 
         states, controls, costs = shooting(
             initial_states, controls_model, dynamics_model, cost_model, horizon)
+
+        controls_dim = tf.shape(controls)[2]
 
         states = tf.reshape(states, [horizon * batch_dim, state_dim, 1])
         controls = tf.reshape(controls, [horizon * batch_dim, controls_dim, 1])
@@ -143,10 +133,10 @@ def iterative_lqr(
         states = tf.reshape(states, [horizon, batch_dim, state_dim, 1])
         controls = tf.reshape(controls, [horizon, batch_dim, controls_dim, 1])
 
-    # update the controls model
+        # update the controls model
 
-    controls_model = time_varying_linear(
-        controls + controls_shift, [states], [controls_state_jacobian])
+        controls_model = time_varying_linear(
+            controls + controls_shift, [states], [controls_state_jacobian])
 
     # run a forward pass using the shooting algorithm
 
