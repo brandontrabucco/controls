@@ -34,39 +34,26 @@ if __name__ == "__main__":
         tf.zeros([20, 1, 3, 1]),
         tf.zeros([20, 1, 1, 1]))
 
-    def dynamics(x):
+    def dynamics_model(x):
         return A @ x[0] + B @ x[1]
 
-    def cost(x):
+    def cost_model(x):
         return 0.5 * tf.matmul(
             tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
             tf.matmul(x[1], R, transpose_a=True), x[1])
 
-    states = tf.random.normal([1, 3, 1])
+    initial_states = tf.random.normal([1, 3, 1])
 
-    policy = time_varying_linear(
+    controls_model = time_varying_linear(
         k,
         [tf.zeros([20, 1, 3, 1])],
         [K])
 
     shooting_states, shooting_controls, shooting_costs = shooting(
-        states, policy, dynamics, cost, 20)
-
-    policy = time_varying_linear(
-        k,
-        [tf.zeros([20, 1, 3, 1])],
-        [K])
-
-    costs_list = []
+        initial_states, controls_model, dynamics_model, cost_model, 20)
 
     for i in range(20):
 
-        controls = policy(states)
+        costs = shooting_costs[i, ...]
 
-        costs = 0.5 * (tf.matmul(tf.matmul(states, Q, transpose_a=True), states) +
-                       tf.matmul(tf.matmul(controls, R, transpose_a=True), controls))
-
-        states = A @ states + B @ controls
-
-        print("Cost: {} Shooting Costs: {}".format(
-            costs.numpy()[0][0][0], shooting_costs[i].numpy()[0][0][0]))
+        print("Cost: {}".format(costs.numpy().sum()))

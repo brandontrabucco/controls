@@ -34,34 +34,8 @@ def iterative_lqr(
     - num_iterations: the number of iterations to run.
 
     Returns:
-    - states: the states with shape [T, batch_dim, state_dim, 1].
-    - controls: the controls with shape [T, batch_dim, controls_dim, 1].
-    - costs: the costs with shape [T, batch_dim, 1, 1].
-
-    - dynamics_state_jacobian: the jacobian of the dynamics wrt. state i
-        with shape [T, batch_dim, state_dim, state_dim].
-    - dynamics_controls_jacobian: the jacobian of the dynamics wrt. controls i
-        with shape [T, batch_dim, state_dim, controls_dim].
-
-    - dynamics_shift: the shift term of the dynamics
-        with shape [T, batch_dim, state_dim, 1].
-
-    - cost_state_state_hessian: the hessian of the cost wrt. state i state j
-        with shape [T, batch_dim, state_dim, state_dim].
-    - cost_state_controls_hessian: the hessian of the cost wrt. state i controls j
-        with shape [T, batch_dim, state_dim, controls_dim].
-    - cost_controls_state_hessian: the hessian of the cost wrt. controls i state j
-        with shape [T, batch_dim, controls_dim, state_dim].
-    - cost_controls_controls_hessian: the hessian of the cost wrt. controls i controls j
-        with shape [T, batch_dim, controls_dim, controls_dim].
-
-    - cost_state_jacobian: the jacobian of the cost wrt. state i
-        with shape [T, batch_dim, state_dim, 1].
-    - cost_controls_jacobian: the jacobian of the cost wrt. controls i
-        with shape [T, batch_dim, controls_dim, 1].
-
-    - cost_shift: the shift term of the cost
-        with shape [batch_dim, 1, 1].
+    - controls_model: the initial policy as a function.
+        the function returns tensors with shape [batch_dim, controls_dim, 1].
     """
 
     # check that all inputs are 3 tensors
@@ -138,7 +112,6 @@ def iterative_lqr(
         controls_model = time_varying_linear(
             controls + controls_shift, [states], [controls_state_jacobian])
 
-    # run a forward pass using the shooting algorithm
+    # return the latest and greatest controls model
 
-    return shooting(
-        initial_states, controls_model, dynamics_model, cost_model, horizon)
+    return controls_model

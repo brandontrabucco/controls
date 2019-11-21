@@ -1,7 +1,8 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.iterative_lqr import iterative_lqr
+from controls import iterative_lqr
+from controls import shooting
 import tensorflow as tf
 
 
@@ -32,16 +33,21 @@ if __name__ == "__main__":
             tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
             tf.matmul(x[1], R, transpose_a=True), x[1])
 
-    results = iterative_lqr(
-        tf.random.normal([1, 3, 1]),
+    initial_states = tf.random.normal([1, 3, 1])
+
+    controls_model = iterative_lqr(
+        initial_states,
         controls_model,
         dynamics_model,
         cost_model,
         20,
         5)
 
+    shooting_states, shooting_controls, shooting_costs = shooting(
+        initial_states, controls_model, dynamics_model, cost_model, 20)
+
     for i in range(20):
 
-        costs = results[2][i, ...]
+        costs = shooting_costs[i, ...]
 
         print("Cost: {}".format(costs.numpy().sum()))
