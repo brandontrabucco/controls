@@ -9,7 +9,20 @@ def time_varying_linear(
         origin_inputs,
         jacobians
 ):
-    """Create a function for a time varying linear model."""
+    """Create a function for a time varying linear model.
+
+    Args:
+    - origin_outputs: the outputs of the nonlinear function centered at origin_inputs.
+        with shape [horizon, batch_dim, outputs_dim, 1].
+    - origin_inputs[i]: the inputs that the taylor approximation is centered around.
+        with shape [horizon, batch_dim, inputs_dim[i], 1].
+    - jacobians[i]: the jacobian of the outputs with respect to inputs[i]
+        with shape [horizon, batch_dim, outputs_dim, inputs_dim[i]].
+
+    Returns:
+    - model: a function representing a time varying linear approximation,
+        which accepts inputs[i] with shape [horizon, batch_dim, inputs_dim[i], 1].
+    """
 
     for i in range(len(origin_inputs)):
 
