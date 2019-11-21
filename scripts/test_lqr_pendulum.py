@@ -9,29 +9,32 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    A = tf.constant([[[-0.313, 56.7, 0.0],
-                      [-0.0139, -0.426, 0.0],
-                      [0.0, 56.7, 0.0]]])
+    A = tf.constant([[[0., 1., 0., 0.],
+                      [0., -.1818, 2.6727, 0.],
+                      [0., 0., 0., 1.],
+                      [0., -.4545, 31.1818, 0.]]])
 
-    B = tf.constant([[[0.232],
-                      [0.0203],
-                      [0.0]]])
+    B = tf.constant([[[0.],
+                      [1.8182],
+                      [0.],
+                      [4.5455]]])
 
-    Q = tf.constant([[[0.0, 0.0, 0.0],
-                      [0.0, 0.0, 0.0],
-                      [0.0, 0.0, 1.0]]])
+    Q = tf.constant([[[1.0, 0.0, 0.0, 0.0],
+                      [0.0, 0.0, 0.0, 0.0],
+                      [0.0, 0.0, 1.0, 0.0],
+                      [0.0, 0.0, 0.0, 0.0]]])
 
     R = tf.constant([[[1.0]]])
 
     K, k, P, p = lqr(
         tf.tile(A[None], [20, 1, 1, 1]),
         tf.tile(B[None], [20, 1, 1, 1]),
-        tf.zeros([20, 1, 3, 1]),
+        tf.zeros([20, 1, 4, 1]),
         tf.tile(Q[None], [20, 1, 1, 1]),
-        tf.zeros([20, 1, 3, 1]),
-        tf.zeros([20, 1, 1, 3]),
+        tf.zeros([20, 1, 4, 1]),
+        tf.zeros([20, 1, 1, 4]),
         tf.tile(R[None], [20, 1, 1, 1]),
-        tf.zeros([20, 1, 3, 1]),
+        tf.zeros([20, 1, 4, 1]),
         tf.zeros([20, 1, 1, 1]))
 
     def dynamics(x):
@@ -42,11 +45,11 @@ if __name__ == "__main__":
             tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
             tf.matmul(x[1], R, transpose_a=True), x[1])
 
-    states = tf.random.normal([1, 3, 1])
+    states = tf.random.normal([1, 4, 1])
 
     policy = time_varying_linear(
         k,
-        [tf.zeros([20, 1, 3, 1])],
+        [tf.zeros([20, 1, 4, 1])],
         [K])
 
     shooting_states, shooting_controls, shooting_costs = shooting(
@@ -54,7 +57,7 @@ if __name__ == "__main__":
 
     policy = time_varying_linear(
         k,
-        [tf.zeros([20, 1, 3, 1])],
+        [tf.zeros([20, 1, 4, 1])],
         [K])
 
     costs_list = []
