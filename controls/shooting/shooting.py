@@ -32,7 +32,7 @@ def shooting(
     - states: the states with shape [T, batch_dim, ..., state_dim, 1].
     - controls: the controls with shape [T, batch_dim, ..., controls_dim, 1].
     - costs: the costs with shape [T, batch_dim, ..., 1, 1].
-        """
+    """
 
     # get the batch shape and vector sizes
 

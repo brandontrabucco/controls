@@ -6,7 +6,7 @@ import tensorflow as tf
 
 def first_order(
         nonlinear_model,
-        *inputs
+        inputs
 ):
     """Linearize a nonlinear vector model about a center.
 
@@ -21,7 +21,7 @@ def first_order(
         with shape [batch_dim, output_dim, 1].
     - jacobians[i]: the jacobian of the outputs wrt. center
         with shape [batch_dim, output_dim, input_dim].
-        """
+    """
 
     # check the shapes of the input tensor
 
@@ -57,7 +57,7 @@ def first_order(
             message="outputs should have shape [batch_dim, output_dim, 1]")
 
     jacobians = [tape.batch_jacobian(
-        outputs, inputs[i])[:, :, 0, :, 0] for i in range(len(inputs))]
+        outputs, inputs[i], experimental_use_pfor=False)[:, :, 0, :, 0] for i in range(len(inputs))]
 
     return (
         outputs,
@@ -66,7 +66,7 @@ def first_order(
 
 def second_order(
         nonlinear_model,
-        *inputs
+        inputs
 ):
     """Quadratic approximate a nonlinear scalar model about a center.
 
@@ -83,7 +83,7 @@ def second_order(
         with shape [batch_dim, input_dim, 1].
     - hessians[i]: the hessian of the outputs wrt. center
         with shape [batch_dim, input_dim, input_dim].
-        """
+    """
 
     # check the shapes of the input tensor
 
@@ -129,7 +129,7 @@ def second_order(
                 message="outputs should have shape [batch_dim, 1, 1]")
 
         jacobians = [inner_tape.batch_jacobian(
-            outputs, inputs[i])[:, 0, 0, :, :] for i in range(len(inputs))]
+            outputs, inputs[i], experimental_use_pfor=False)[:, 0, 0, :, :] for i in range(len(inputs))]
 
     hessians = [[outer_tape.batch_jacobian(
         jacobians[i], inputs[j], experimental_use_pfor=False)[:, :, 0, :, 0] for j in range(len(inputs))]

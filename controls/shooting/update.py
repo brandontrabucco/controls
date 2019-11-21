@@ -23,7 +23,7 @@ def create_shooting_update(
 
     Returns:
     - a function shooting_update
-        """
+    """
 
     def shooting_update(
             states,
@@ -37,7 +37,7 @@ def create_shooting_update(
         - predicted_states: the next state with shape [batch_dim, state_dim, 1].
         - controls: the controls with shape [batch_dim, controls_dim, 1].
         - costs: the costs with shape [batch_dim, 1, 1].
-            """
+        """
 
         tf.debugging.assert_equal(
             3,

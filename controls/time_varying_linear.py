@@ -5,32 +5,30 @@ import tensorflow as tf
 
 
 def time_varying_linear(
-        origin_inputs,
         origin_outputs,
-        jacobian
+        origin_inputs,
+        jacobians
 ):
     """Create a function for a time varying linear model."""
 
-    # get the batch shape and vector sizes
+    for i in range(len(origin_inputs)):
 
-    batch_dim = tf.reduce_prod(tf.shape(jacobian)[1:-2])
+        # get the batch shape and vector sizes
 
-    horizon = tf.shape(jacobian)[0]
+        horizon = tf.shape(jacobians[i])[0]
+        batch_dim = tf.shape(jacobians[i])[1]
+        outputs_dim = jacobians[i].shape[2]
+        inputs_dim = jacobians[i].shape[3]
 
-    inputs_dim = jacobian.shape[-1]
+        # create a time varying linear model
 
-    outputs_dim = jacobian.shape[-2]
-
-    # create a time varying linear model
-
-    origin_inputs = tf.reshape(
-        origin_inputs, [horizon, batch_dim, inputs_dim, 1])
+        origin_inputs[i] = tf.reshape(
+            origin_inputs[i], [horizon, batch_dim, inputs_dim, 1])
+        jacobians[i] = tf.reshape(
+            jacobians[i], [horizon, batch_dim, outputs_dim, inputs_dim])
 
     origin_outputs = tf.reshape(
         origin_outputs, [horizon, batch_dim, outputs_dim, 1])
-
-    jacobian = tf.reshape(
-        jacobian, [horizon, batch_dim, outputs_dim, inputs_dim])
 
     time = -1
 
@@ -48,7 +46,12 @@ def time_varying_linear(
             horizon,
             message="cannot use model beyond original horizon")
 
-        return origin_outputs[time, ...] + tf.matmul(
-            jacobian[time, ...], x[0] - origin_inputs[time, ...])
+        result = origin_outputs[time, ...]
+
+        for i in range(len(origin_inputs)):
+            result = result + tf.matmul(
+                jacobians[i][time, ...], x[i] - origin_inputs[i][time, ...])
+
+        return result
 
     return model

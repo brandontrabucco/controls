@@ -1,7 +1,9 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
+
 from controls.iterative_lqr import iterative_lqr
 import tensorflow as tf
+
 
 if __name__ == "__main__":
 
@@ -33,7 +35,7 @@ if __name__ == "__main__":
         dynamics_model,
         cost_model,
         100,
-        10)
+        5)
 
     for i in range(100):
 

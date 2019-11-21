@@ -25,6 +25,8 @@ if __name__ == "__main__":
 
     K, P = infinite_horizon_lqr(A, B, Q, R)
 
+    print(K)
+
     def dynamics(x):
         return A @ x[0] + B @ x[1]
 
@@ -36,17 +38,17 @@ if __name__ == "__main__":
     states = tf.random.normal([1, 3, 1])
 
     policy = time_varying_linear(
-        tf.zeros([100, 1, 3, 1]),
         tf.zeros([100, 1, 1, 1]),
-        tf.tile(K[None, ...], [100, 1, 1, 1]))
+        [tf.zeros([100, 1, 3, 1])],
+        [tf.tile(K[None, ...], [100, 1, 1, 1])])
 
     shooting_states, shooting_controls, shooting_costs = shooting(
         states, policy, dynamics, cost, 100)
 
     policy = time_varying_linear(
-        tf.zeros([100, 1, 3, 1]),
         tf.zeros([100, 1, 1, 1]),
-        tf.tile(K[None, ...], [100, 1, 1, 1]))
+        [tf.zeros([100, 1, 3, 1])],
+        [tf.tile(K[None, ...], [100, 1, 1, 1])])
 
     costs_list = []
 
