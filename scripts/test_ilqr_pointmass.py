@@ -13,7 +13,7 @@ if __name__ == "__main__":
     goal = tf.ones([1, size, 1])
 
     def controls_model(x):
-        return tf.zeros([1, size, 1])
+        return tf.zeros([tf.shape(x[0])[0], size, 1])
 
     def dynamics_model(x):
         return x[0] + x[1]

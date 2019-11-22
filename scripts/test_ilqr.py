@@ -23,7 +23,7 @@ if __name__ == "__main__":
     R = tf.constant([[[1.0]]])
 
     def controls_model(x):
-        return tf.zeros([1, 1, 1])
+        return tf.zeros([tf.shape(x[0])[0], 1, 1])
 
     def dynamics_model(x):
         return A @ x[0] + B @ x[1]
