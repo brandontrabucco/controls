@@ -24,16 +24,38 @@ def linear_model(
         which accepts inputs[i] with shape [horizon, batch_dim, inputs_dim[i], 1].
     """
 
+    tf.debugging.assert_equal(
+        4,
+        tf.size(tf.shape(origin_outputs)),
+        message="origin_outputs should be a 4 tensor")
+
+    tf.debugging.assert_equal(
+        1,
+        tf.shape(origin_outputs)[3],
+        message="origin_outputs should have shape [horizon, batch_dim, outputs_dim, 1]")
+
+    horizon = tf.shape(origin_outputs)[0]
+    batch_dim = tf.shape(origin_outputs)[1]
+    outputs_dim = tf.shape(origin_outputs)[2]
+
     for i in range(len(origin_inputs)):
 
-        # get the batch shape and vector sizes
+        tf.debugging.assert_equal(
+            4,
+            tf.size(tf.shape(jacobians[i])),
+            message="jacobians[i] should be a 4 tensor")
 
-        horizon = tf.shape(jacobians[i])[0]
-        batch_dim = tf.shape(jacobians[i])[1]
-        outputs_dim = jacobians[i].shape[2]
+        tf.debugging.assert_equal(
+            4,
+            tf.size(tf.shape(origin_inputs[i])),
+            message="origin_inputs[i] should be a 4 tensor")
+
+        tf.debugging.assert_equal(
+            1,
+            tf.shape(origin_inputs[i])[3],
+            message="origin_inputs[i] should have shape [horizon, batch_dim, inputs_dim[i], 1]")
+
         inputs_dim = jacobians[i].shape[3]
-
-        # create a time varying linear model
 
         origin_inputs[i] = tf.reshape(
             origin_inputs[i], [horizon, batch_dim, inputs_dim, 1])
@@ -84,17 +106,15 @@ def constant_model(
         which accepts inputs[i] with any shape.
     """
 
-    tf.debugging.assert_less(
+    tf.debugging.assert_equal(
         4,
         tf.size(tf.shape(outputs)),
         message="outputs should be a 4 tensor")
 
-    tf.debugging.assert_less(
+    tf.debugging.assert_equal(
         1,
         tf.shape(outputs)[3],
         message="outputs should have shape [horizon, batch_dim, outputs_dim, 1]")
-
-    # get the batch shape and vector sizes
 
     horizon = tf.shape(outputs)[0]
 

@@ -17,7 +17,7 @@ def cem(
         top_k=100,
         exploration_noise_std=0.1
 ):
-    """Solves for the optimal actions using the cross entropy method.
+    """Solves for optimal actions using the cross entropy method.
 
     Args:
     - initial_states: the initial states from which to predict into the future
@@ -68,7 +68,7 @@ def cem(
             initial_states, exploration_controls_model, dynamics_model, cost_model, horizon)
 
         # compute the top k action samples by their negative cost
-        best_idx = tf.nn.top(-tf.reduce_sum(
+        best_idx = tf.math.top_k(-tf.reduce_sum(
             tf.reshape(candidate_costs, [horizon, batch_dim, num_candidates]), axis=0), k=top_k)[1]
 
         # infer the cardinality of the controls from the shooting
@@ -77,10 +77,11 @@ def cem(
         # compute the controls sequences in the top k
         best_controls = tf.gather(
             tf.reshape(candidate_controls, [horizon, batch_dim, num_candidates, controls_dim, 1]),
-            best_idx, axis=2, batch_dims=2)
+            tf.tile(best_idx[tf.newaxis, :, :], [horizon, 1, 1]), axis=2, batch_dims=2)
 
         # compute the empirical average of the best candidate controls
-        controls_model = constant_model(tf.reduce_mean(best_controls, axis=2))
+        controls_model = constant_model(tf.tile(tf.reduce_mean(
+            best_controls, axis=2), [1, num_candidates if i < num_iterations - 1 else 1, 1, 1]))
 
     # return the latest and greatest controls model
     return controls_model
