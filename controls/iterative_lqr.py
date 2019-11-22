@@ -16,7 +16,7 @@ def iterative_lqr(
         cost_model,
         horizon=10,
         num_iterations=5,
-        alpha=0.01,
+        trust_region_alpha=0.01,
 ):
     """Solves for the value iteration solution to lqr iteratively.
 
@@ -33,7 +33,7 @@ def iterative_lqr(
 
     - horizon: the number of steps into the future for the planner.
     - num_iterations: the number of iterations to run.
-    - alpha: the weight of the cost function trust region.
+    - trust_region_alpha: the weight of the cost function trust region.
 
     Returns:
     - controls_model: the initial policy as a function.
@@ -77,9 +77,9 @@ def iterative_lqr(
         dynamics_controls_jacobian = tf.reshape(
             jacobians[1], [horizon, batch_dim, state_dim, controls_dim])
 
-        # quadratic approximate the dynamics
+        # quadratic approximate the cost function with a trust region
         def trust_region_cost_model(x):
-            return (1.0 - alpha) * cost_model(x) + alpha * (
+            return (1.0 - trust_region_alpha) * cost_model(x) + trust_region_alpha * (
                 tf.matmul(x[0] - last_states, x[0] - last_states, transpose_a=True) +
                 tf.matmul(x[1] - last_controls, x[1] - last_controls, transpose_a=True))
 

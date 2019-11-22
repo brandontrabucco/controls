@@ -32,7 +32,7 @@ if __name__ == "__main__":
         cost_model,
         horizon=10,
         num_iterations=100,
-        alpha=0.1)
+        trust_region_alpha=0.1)
 
     shooting_states, shooting_controls, shooting_costs = shooting(
         initial_states, controls_model, dynamics_model, cost_model, 10)
