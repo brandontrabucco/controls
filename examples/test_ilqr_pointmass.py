@@ -19,9 +19,8 @@ if __name__ == "__main__":
         return x[0] + x[1]
 
     def cost_model(x):
-        return 0.5 * (
-            tf.matmul(x[0] - goal, x[0] - goal, transpose_a=True) +
-            tf.matmul(x[1], x[1], transpose_a=True))
+        return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) +
+                tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
 
     initial_states = -tf.ones([1, size, 1])
 

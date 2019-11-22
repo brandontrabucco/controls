@@ -20,8 +20,7 @@ if __name__ == "__main__":
             tf.clip_by_value(x[1][:, 1, :], -1., 1.)], 1)
 
     def cost_model(x):
-        return 0.5 * tf.matmul(
-            x[0][:, :2, :] - goal, x[0][:, :2, :] - goal, transpose_a=True)
+        return tf.matmul(x[0][:, :2, :] - goal, x[0][:, :2, :] - goal, transpose_a=True) / 2.
 
     initial_states = -tf.ones([1, 3, 1])
 

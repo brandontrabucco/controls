@@ -8,20 +8,17 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    A = tf.constant([[[0., 1., 0., 0.],
-                      [0., -.1818, 2.6727, 0.],
-                      [0., 0., 0., 1.],
-                      [0., -.4545, 31.1818, 0.]]])
+    A = tf.constant([[[-0.313, 56.7, 0.0],
+                      [-0.0139, -0.426, 0.0],
+                      [0.0, 56.7, 0.0]]])
 
-    B = tf.constant([[[0.],
-                      [1.8182],
-                      [0.],
-                      [4.5455]]])
+    B = tf.constant([[[0.232],
+                      [0.0203],
+                      [0.0]]])
 
-    Q = tf.constant([[[1.0, 0.0, 0.0, 0.0],
-                      [0.0, 0.0, 0.0, 0.0],
-                      [0.0, 0.0, 1.0, 0.0],
-                      [0.0, 0.0, 0.0, 0.0]]])
+    Q = tf.constant([[[0.0, 0.0, 0.0],
+                      [0.0, 0.0, 0.0],
+                      [0.0, 0.0, 1.0]]])
 
     R = tf.constant([[[1.0]]])
 
@@ -32,11 +29,10 @@ if __name__ == "__main__":
         return A @ x[0] + B @ x[1]
 
     def cost_model(x):
-        return 0.5 * (
-            tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) +
-            tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1]))
+        return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) +
+                tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
 
-    initial_states = tf.random.normal([1, 4, 1])
+    initial_states = tf.random.normal([1, 3, 1])
 
     controls_model = iterative_lqr(
         initial_states,

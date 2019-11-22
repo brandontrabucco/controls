@@ -1,8 +1,9 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls import cem
-from controls import shooting
+from controls import lqr
+from controls.time_varying import linear_model
+from controls.shooting.shooting import shooting
 import tensorflow as tf
 
 
@@ -22,29 +23,30 @@ if __name__ == "__main__":
 
     R = tf.constant([[[1.0]]])
 
-    def controls_model(x):
-        return tf.zeros([tf.shape(x[0])[0], 1, 1])
+    K, k, P, p = lqr(
+        tf.tile(A[None], [20, 1, 1, 1]),
+        tf.tile(B[None], [20, 1, 1, 1]),
+        tf.zeros([20, 1, 3, 1]),
+        tf.tile(Q[None], [20, 1, 1, 1]),
+        tf.zeros([20, 1, 3, 1]),
+        tf.zeros([20, 1, 1, 3]),
+        tf.tile(R[None], [20, 1, 1, 1]),
+        tf.zeros([20, 1, 3, 1]),
+        tf.zeros([20, 1, 1, 1]))
 
     def dynamics_model(x):
         return A @ x[0] + B @ x[1]
 
     def cost_model(x):
-        return 0.5 * tf.matmul(
-            tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
-            tf.matmul(x[1], R, transpose_a=True), x[1])
+        return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) +
+                tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
 
     initial_states = tf.random.normal([1, 3, 1])
 
-    controls_model = cem(
-        initial_states,
-        controls_model,
-        dynamics_model,
-        cost_model,
-        horizon=20,
-        num_candidates=1000,
-        num_iterations=100,
-        top_k=100,
-        exploration_noise_std=1.0)
+    controls_model = linear_model(
+        k,
+        [tf.zeros([20, 1, 3, 1])],
+        [K])
 
     shooting_states, shooting_controls, shooting_costs = shooting(
         initial_states, controls_model, dynamics_model, cost_model, 20)
