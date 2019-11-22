@@ -2,7 +2,7 @@
 
 
 from controls import lqr
-from controls.time_varying_linear import time_varying_linear
+from controls.time_varying import linear_model
 from controls.shooting.shooting import shooting
 import tensorflow as tf
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     initial_states = tf.random.normal([1, 3, 1])
 
-    controls_model = time_varying_linear(
+    controls_model = linear_model(
         k,
         [tf.zeros([20, 1, 3, 1])],
         [K])

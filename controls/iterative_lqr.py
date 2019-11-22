@@ -3,7 +3,7 @@
 
 from controls.lqr.lqr import lqr
 from controls.shooting.shooting import shooting
-from controls.time_varying_linear import time_varying_linear
+from controls.time_varying import linear_model
 from controls.taylor_series import first_order
 from controls.taylor_series import second_order
 import tensorflow as tf
@@ -36,7 +36,7 @@ def iterative_lqr(
     - trust_region_alpha: the weight of the cost function trust region.
 
     Returns:
-    - controls_model: the initial policy as a function.
+    - controls_model: the policy as a function.
         the function returns tensors with shape [batch_dim, controls_dim, 1].
     """
 
@@ -117,9 +117,8 @@ def iterative_lqr(
         controls = tf.reshape(controls, [horizon, batch_dim, controls_dim, 1])
 
         # update the controls model
-        controls_model = time_varying_linear(
+        controls_model = linear_model(
             controls + controls_shift, [states], [controls_state_jacobian])
 
     # return the latest and greatest controls model
-
     return controls_model

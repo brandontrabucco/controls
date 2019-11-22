@@ -4,7 +4,7 @@
 import tensorflow as tf
 
 
-def time_varying_linear(
+def linear_model(
         origin_outputs,
         origin_inputs,
         jacobians
@@ -66,5 +66,54 @@ def time_varying_linear(
                 jacobians[i][time, ...], x[i] - origin_inputs[i][time, ...])
 
         return result
+
+    return model
+
+
+def constant_model(
+        outputs,
+):
+    """Create a function for a time varying constant model.
+
+    Args:
+    - outputs: the outputs of the nonlinear time varying function
+        with shape [horizon, batch_dim, outputs_dim, 1].
+
+    Returns:
+    - model: a function representing a time varying function,
+        which accepts inputs[i] with any shape.
+    """
+
+    tf.debugging.assert_less(
+        4,
+        tf.size(tf.shape(outputs)),
+        message="outputs should be a 4 tensor")
+
+    tf.debugging.assert_less(
+        1,
+        tf.shape(outputs)[3],
+        message="outputs should have shape [horizon, batch_dim, outputs_dim, 1]")
+
+    # get the batch shape and vector sizes
+
+    horizon = tf.shape(outputs)[0]
+
+    time = -1
+
+    def model(
+            x
+    ):
+        """Compute a forward pass using the model."""
+
+        nonlocal time
+
+        time += 1
+
+        tf.debugging.assert_less(
+            time,
+            horizon,
+            message="cannot use model beyond original horizon")
+
+        return outputs[time, ...]
 
     return model
