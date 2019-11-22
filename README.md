@@ -45,9 +45,8 @@ def dynamics_model(x):
     return A @ x[0] + B @ x[1]
 
 def cost_model(x):
-    return 0.5 * tf.matmul(
-        tf.matmul(x[0], Q, transpose_a=True), x[0]) + 0.5 * tf.matmul(
-        tf.matmul(x[1], R, transpose_a=True), x[1])
+    return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) + 
+            tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
 ```
 
 Define your initial policy where the optimizer starts.
