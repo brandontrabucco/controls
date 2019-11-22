@@ -24,7 +24,7 @@ Collect a batch of initial states.
 initial_states = tf.random.normal([1, 3, 1])
 ```
 
-Define your dynamics model and cost function.
+Define your dynamics model and cost model.
 
 ```
 A = tf.constant([[[-0.313, 56.7, 0.0],
@@ -56,7 +56,7 @@ def controls_model(x):
     return tf.zeros([tf.shape(x[0])[0], 1, 1])
 ```
 
-Launch the optmizer to get a new policy.
+Launch the optimizer to get a new policy.
 
 ```
 controls_model = cem(
