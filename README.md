@@ -1,6 +1,6 @@
 # Controls
 
-This package implements differentiable optimal control algorithms in TensorFlow 2.0. Have Fun! -Brandon
+This package implements differentiable optimal controls in TensorFlow 2.0. Have Fun! -Brandon
 
 # Setup
 
