@@ -51,9 +51,15 @@ def iterative_lqr(
     state_dim = tf.shape(initial_states)[1]
     dtype = initial_states.dtype
 
-    # run a forward pass using the shooting algorithm
-    last_states, last_controls, last_costs = shooting(
+    # run an initial forward pass using the shooting algorithm
+    states, controls, costs = shooting(
         initial_states, controls_model, dynamics_model, cost_model, horizon)
+
+    # infer the cardinality of the controls from the shooting
+    controls_dim = tf.shape(controls)[2]
+
+    last_states = tf.reshape(states, [horizon * batch_dim, state_dim, 1])
+    last_controls = tf.reshape(controls, [horizon * batch_dim, controls_dim, 1])
 
     # iteratively run forward shooting and backward controls optimization with lqr
     for i in range(num_iterations):
@@ -62,12 +68,8 @@ def iterative_lqr(
         states, controls, costs = shooting(
             initial_states, controls_model, dynamics_model, cost_model, horizon)
 
-        controls_dim = tf.shape(controls)[2]
-
         states = tf.reshape(states, [horizon * batch_dim, state_dim, 1])
         controls = tf.reshape(controls, [horizon * batch_dim, controls_dim, 1])
-        last_states = tf.reshape(last_states, [horizon * batch_dim, state_dim, 1])
-        last_controls = tf.reshape(last_controls, [horizon * batch_dim, controls_dim, 1])
 
         # linear approximate the dynamics
         shifts, jacobians = first_order(dynamics_model, [states, controls])
@@ -109,10 +111,10 @@ def iterative_lqr(
                 cost_state_jacobian,
                 cost_controls_jacobian)
 
-        states = tf.reshape(states, [horizon, batch_dim, state_dim, 1])
-        controls = tf.reshape(controls, [horizon, batch_dim, controls_dim, 1])
         last_states = states
         last_controls = controls
+        states = tf.reshape(states, [horizon, batch_dim, state_dim, 1])
+        controls = tf.reshape(controls, [horizon, batch_dim, controls_dim, 1])
 
         # update the controls model
         controls_model = time_varying_linear(
