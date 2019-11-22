@@ -43,8 +43,9 @@ if __name__ == "__main__":
         controls_model,
         dynamics_model,
         cost_model,
-        20,
-        5)
+        horizon=20,
+        num_iterations=10,
+        alpha=0.1)
 
     shooting_states, shooting_controls, shooting_costs = shooting(
         initial_states, controls_model, dynamics_model, cost_model, 20)
