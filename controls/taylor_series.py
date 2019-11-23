@@ -11,7 +11,7 @@ def first_order(
     """Linearize a nonlinear vector model about a center.
 
     Args:
-    - nonlinear_model: a nonlinear model that is a function
+    - nonlinear_model: a nonlinear model that is a distribution
         the function accepts inputs of shape [batch_dim, input_dim, 1].
     - inputs[i]: the vector around which to build a local approximation
         with shape [batch_dim, input_dim, 1].
@@ -22,46 +22,17 @@ def first_order(
     - jacobians[i]: the jacobian of the outputs wrt. center
         with shape [batch_dim, output_dim, input_dim].
     """
-
-    # check the shapes of the input tensor
-
-    for i in range(len(inputs)):
-
-        tf.debugging.assert_equal(
-            3,
-            tf.size(tf.shape(inputs[i])),
-            message="inputs[{}] should be a 3 tensor".format(i))
-
-        tf.debugging.assert_equal(
-            1,
-            tf.shape(inputs[i])[-1],
-            message="inputs[{}] should have shape [batch_dim, input_dim, 1]".format(i))
-
-    # approximate the model using gradients
-
     with tf.GradientTape(persistent=True) as tape:
 
         for i in range(len(inputs)):
             tape.watch(inputs[i])
 
-        outputs = nonlinear_model(inputs)
-
-        tf.debugging.assert_equal(
-            3,
-            tf.size(tf.shape(outputs)),
-            message="outputs should be a 3 tensor")
-
-        tf.debugging.assert_equal(
-            1,
-            tf.shape(outputs)[-1],
-            message="outputs should have shape [batch_dim, output_dim, 1]")
+        outputs = nonlinear_model(0, inputs)
 
     jacobians = [tape.batch_jacobian(
         outputs, inputs[i], experimental_use_pfor=False)[:, :, 0, :, 0] for i in range(len(inputs))]
 
-    return (
-        outputs,
-        jacobians)
+    return [outputs] + jacobians
 
 
 def second_order(
@@ -71,7 +42,7 @@ def second_order(
     """Quadratic approximate a nonlinear scalar model about a center.
 
     Args:
-    - nonlinear_model: a nonlinear model that is a function
+    - nonlinear_model: a nonlinear model that is a distribution
         the function accepts inputs of shape [batch_dim, input_dim, 1].
     - inputs[i]: the vector around which to build a local approximation
         with shape [batch_dim, input_dim, 1].
@@ -84,23 +55,6 @@ def second_order(
     - hessians[i]: the hessian of the outputs wrt. center
         with shape [batch_dim, input_dim, input_dim].
     """
-
-    # check the shapes of the input tensor
-
-    for i in range(len(inputs)):
-
-        tf.debugging.assert_equal(
-            3,
-            tf.size(tf.shape(inputs[i])),
-            message="inputs[{}] should be a 3 tensor".format(i))
-
-        tf.debugging.assert_equal(
-            1,
-            tf.shape(inputs[i])[-1],
-            message="inputs[{}] should have shape [batch_dim, input_dim, 1]".format(i))
-
-    # approximate the model using gradients
-
     with tf.GradientTape(persistent=True) as outer_tape:
 
         for i in range(len(inputs)):
@@ -111,22 +65,7 @@ def second_order(
             for i in range(len(inputs)):
                 inner_tape.watch(inputs[i])
 
-            outputs = nonlinear_model(inputs)
-
-            tf.debugging.assert_equal(
-                3,
-                tf.size(tf.shape(outputs)),
-                message="outputs should be a 3 tensor")
-
-            tf.debugging.assert_equal(
-                1,
-                tf.shape(outputs)[-1],
-                message="outputs should have shape [batch_dim, 1, 1]")
-
-            tf.debugging.assert_equal(
-                1,
-                tf.shape(outputs)[-2],
-                message="outputs should have shape [batch_dim, 1, 1]")
+            outputs = nonlinear_model(0, inputs)
 
         jacobians = [inner_tape.batch_jacobian(
             outputs, inputs[i], experimental_use_pfor=False)[:, 0, 0, :, :] for i in range(len(inputs))]
@@ -135,7 +74,4 @@ def second_order(
         jacobians[i], inputs[j], experimental_use_pfor=False)[:, :, 0, :, 0] for j in range(len(inputs))]
             for i in range(len(jacobians))]
 
-    return (
-        outputs,
-        jacobians,
-        hessians)
+    return [outputs] + jacobians + [x for y in hessians for x in y]

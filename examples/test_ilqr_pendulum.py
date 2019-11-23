@@ -5,6 +5,7 @@ from controls import iterative_lqr
 from controls import shooting
 import tensorflow as tf
 
+from controls.distributions.deterministic import Deterministic
 
 if __name__ == "__main__":
 
@@ -25,15 +26,11 @@ if __name__ == "__main__":
 
     R = tf.constant([[[1.0]]])
 
-    def controls_model(x):
-        return tf.zeros([tf.shape(x[0])[0], 1, 1])
-
-    def dynamics_model(x):
-        return A @ x[0] + B @ x[1]
-
-    def cost_model(x):
-        return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) +
-                tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
+    controls_model = Deterministic(lambda time, inputs: tf.zeros([1, 1, 1]))
+    dynamics_model = Deterministic(lambda time, inputs: A @ inputs[0] + B @ inputs[1])
+    cost_model = Deterministic(lambda time, inputs: 0.5 * (
+        tf.matmul(tf.matmul(inputs[0], Q, transpose_a=True), inputs[0]) +
+        tf.matmul(tf.matmul(inputs[1], R, transpose_a=True), inputs[1])))
 
     initial_states = tf.random.normal([1, 4, 1])
 
@@ -42,12 +39,12 @@ if __name__ == "__main__":
         controls_model,
         dynamics_model,
         cost_model,
-        horizon=20,
-        num_iterations=10,
-        trust_region_alpha=0.1)
+        h=20,
+        n=10,
+        a=0.0)
 
     shooting_states, shooting_controls, shooting_costs = shooting(
-        initial_states, controls_model, dynamics_model, cost_model, 20)
+        initial_states, controls_model, dynamics_model, cost_model, h=20)
 
     for i in range(20):
 
