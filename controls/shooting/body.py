@@ -9,48 +9,26 @@ def create_shooting_body(
         dynamics_model,
         cost_model,
 ):
-    """Create Inner body of shooting update loop."""
-
     shooting_update = create_shooting_update(
         controls_model,
         dynamics_model,
         cost_model)
 
     def shooting_body(
-            states,
-            states_array,
-            controls_array,
-            costs_array,
-            time,
-            horizon
+        x,
+        x_array,
+        u_array,
+        c_array,
+        time,
+        horizon
     ):
-        """Inner body of shooting update loop."""
-
-        # run the lqr and collect results
-
-        update_result = shooting_update(states)
-
-        # propagate results through the bellman backup
-
-        predicted_states = update_result[0]
-
-        states_array = states_array.write(
-            time, states)
-
-        controls_array = controls_array.write(
-            time, update_result[1])
-
-        costs_array = costs_array.write(
-            time, update_result[2])
-
-        time = time + 1
-
+        xp1, u, c = shooting_update(x, time)
         return (
-            predicted_states,
-            states_array,
-            controls_array,
-            costs_array,
-            time,
+            xp1,
+            x_array.write(time, x),
+            u_array.write(time, u),
+            c_array.write(time, c),
+            time + 1,
             horizon)
 
     return shooting_body

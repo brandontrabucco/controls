@@ -2,7 +2,7 @@
 
 
 from controls import lqr
-from controls.time_varying import linear_model
+from controls.time_varying import linear_gaussian
 from controls.shooting.shooting import shooting
 import tensorflow as tf
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     initial_states = tf.random.normal([1, 3, 1])
 
-    controls_model = linear_model(
+    controls_model = linear_gaussian(
         k,
         [tf.zeros([20, 1, 3, 1])],
         [K])
