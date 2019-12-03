@@ -70,7 +70,7 @@ def lqr(
     ):
         Qxx, Qxu, Qux, Quu, Qx, Qu, Kx, k, S, Vxx, Vx = update(
             inputs[0],
-            inputs[1],
+            inputs[1][:, :, tf.newaxis],
             inputs[2][inputs[21], :, :, :],
             inputs[3][inputs[21], :, :, :],
             inputs[4][inputs[21], :, :, :],
@@ -82,7 +82,7 @@ def lqr(
 
         return (
             Vxx,
-            Vx,
+            Vx[:, :, 0],
             inputs[2],
             inputs[3],
             inputs[4],

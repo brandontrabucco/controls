@@ -17,6 +17,7 @@ def iterative_lqr(
         h=10,
         n=5,
         a=0.01,
+        random=True
 ):
     """Solves for the value iteration solution to lqr iteratively.
 
@@ -34,12 +35,13 @@ def iterative_lqr(
     - h: the number of steps into the future for the planner.
     - n: the number of iterations to run.
     - a: the weight of the cost function trust region.
+    - random: samples from the policy randomly if true.
 
     Returns:
     - controls_model: the policy as a function.
         the function returns tensors with shape [batch_dim, controls_dim].
     """
-    xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h)
+    xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
     # collect the tensor shapes of the states and controls
     batch_dim = tf.shape(x0)[0]
@@ -54,7 +56,7 @@ def iterative_lqr(
     for iteration in range(n):
 
         # run the forward dynamics probabilistically
-        xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h)
+        xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
         # flatten the states and controls
         xi = tf.reshape(xi, [h * batch_dim, state_dim])
@@ -71,9 +73,11 @@ def iterative_lqr(
         def wrapped_cost(time, inputs):
             x_error = (inputs[0] - xim1)[:, :, tf.newaxis]
             u_error = (inputs[1] - uim1)[:, :, tf.newaxis]
-            return (1.0 - a) * cost_model(time, inputs) + a * (
+            trust_region = (
                 tf.matmul(x_error, x_error, transpose_a=True) +
-                tf.matmul(u_error, u_error, transpose_a=True))
+                tf.matmul(u_error, u_error, transpose_a=True))[:, 0, 0]
+            return ((1.0 - a) * cost_model(
+                time, inputs) + a * trust_region)[:, tf.newaxis]
 
         # compute the second order taylor series
         Cx, Cu, Cxx, Cxu, Cux, Cuu = second_order(wrapped_cost, [xi, ui])[1:]

@@ -11,14 +11,13 @@ if __name__ == "__main__":
 
     size = 5
 
-    goal = tf.ones([1, size, 1])
+    goal = tf.ones([1, size])
 
-    controls_model = Deterministic(lambda time, inputs: tf.zeros([1, size, 1]))
+    controls_model = Deterministic(lambda time, inputs: tf.zeros([1, size]))
     dynamics_model = Deterministic(lambda time, inputs: inputs[0] + inputs[1])
-    cost_model = Deterministic(lambda time, inputs: tf.matmul(
-        inputs[0] - goal, inputs[0] - goal, transpose_a=True))
+    cost_model = Deterministic(lambda time, inputs: tf.reduce_sum((inputs[0] - goal)**2, axis=1))
 
-    initial_states = -tf.ones([1, size, 1])
+    initial_states = -tf.ones([1, size])
 
     controls_model = iterative_lqr(
         initial_states,
@@ -27,10 +26,11 @@ if __name__ == "__main__":
         cost_model,
         h=20,
         n=10,
-        a=0.01)
+        a=0.01,
+        random=False)
 
     shooting_states, shooting_controls, shooting_costs = shooting(
-        initial_states, controls_model, dynamics_model, cost_model, h=20)
+        initial_states, controls_model, dynamics_model, cost_model, h=20, random=False)
 
     for i in range(20):
 

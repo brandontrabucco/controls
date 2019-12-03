@@ -49,7 +49,7 @@ if __name__ == "__main__":
         k=100)
 
     xi, ui, ci = shooting(
-        initial_states, controls_model, dynamics_model, cost_model, h=20)
+        initial_states, controls_model, dynamics_model, cost_model, h=20, random=False)
 
     for i in range(20):
         costs = ci[i, ...]
