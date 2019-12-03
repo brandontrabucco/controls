@@ -7,6 +7,22 @@ import tensorflow as tf
 
 class Deterministic(Distribution):
 
+    def fit(
+            self,
+            samples
+    ):
+        """Maximum likelihood estimation of the distribution.
+
+        Args:
+        - samples: samples from a distribution of a random variable
+            with shape [T, batch_dim, outputs_dim].
+
+        Returns:
+        - distribution: a distribution fitted using maximum likelihoods estimation
+            the function returns tensors with shape [batch_dim, output_dim].
+        """
+        return NotImplemented
+
     def sample(
             self,
             time,
@@ -17,16 +33,16 @@ class Deterministic(Distribution):
         Args:
         - time: an integer representing the time step of the system.
         - inputs[i]: the inputs to the deterministic distribution
-            with shape [batch_dim, inputs_dim[i], 1].
+            with shape [batch_dim, inputs_dim[i]].
 
         Returns:
         - samples: samples from a deterministic distribution
-            with shape [batch_dim, outputs_dim, 1]
+            with shape [batch_dim, outputs_dim]
         - log_prob: the log probability of samples
-            with shape [batch_dim, 1, 1].
+            with shape [batch_dim].
         """
         samples = self.get_parameters(time, inputs)
-        return samples, tf.zeros([tf.shape(samples)[0], 1, 1])
+        return samples, tf.zeros([tf.shape(samples)[0]])
 
     def expected_value(
             self,
@@ -38,16 +54,16 @@ class Deterministic(Distribution):
         Args:
         - time: an integer representing the time step of the system.
         - inputs[i]: the inputs to the deterministic distribution
-            with shape [batch_dim, inputs_dim[i], 1].
+            with shape [batch_dim, inputs_dim[i]].
 
         Returns:
         - samples: samples from a deterministic distribution
-            with shape [batch_dim, outputs_dim, 1]
+            with shape [batch_dim, outputs_dim]
         - log_prob: the log probability of samples
-            with shape [batch_dim, 1, 1].
+            with shape [batch_dim].
         """
         samples = self.get_parameters(time, inputs)
-        return samples, tf.zeros([tf.shape(samples)[0], 1, 1])
+        return samples, tf.zeros([tf.shape(samples)[0]])
 
     def log_prob(
             self,
@@ -59,13 +75,13 @@ class Deterministic(Distribution):
 
         Args:
         - samples: samples from a deterministic distribution
-            with shape [batch_dim, outputs_dim, 1]
+            with shape [batch_dim, outputs_dim]
         - time: an integer representing the time step of the system.
         - inputs[i]: the inputs to the deterministic distribution
-            with shape [batch_dim, inputs_dim[i], 1].
+            with shape [batch_dim, inputs_dim[i]].
 
         Returns:
         - log_prob: the log probability of samples
-            with shape [batch_dim, 1, 1].
+            with shape [batch_dim].
         """
-        return tf.zeros([tf.shape(samples)[0], 1, 1])
+        return tf.zeros([tf.shape(samples)[0]])

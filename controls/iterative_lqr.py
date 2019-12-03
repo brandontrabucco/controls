@@ -2,10 +2,10 @@
 
 
 from controls.lqr.lqr import lqr
-from controls.shooting.shooting import shooting
+from controls.shooting import shooting
 from controls.taylor_series import first_order
 from controls.taylor_series import second_order
-from controls.distributions.deterministic import Deterministic
+from controls.distributions.gaussian import Gaussian
 import tensorflow as tf
 
 
@@ -22,14 +22,14 @@ def iterative_lqr(
 
     Args:
     - x0: the initial states from which to predict into the future
-        with shape [batch_dim, state_dim, 1].
+        with shape [batch_dim, state_dim].
 
     - controls_model: the initial policy as a distribution.
-        the function returns tensors with shape [batch_dim, controls_dim, 1].
+        the function returns tensors with shape [batch_dim, controls_dim].
     - dynamics_model: the dynamics as a distribution.
-        the function returns tensors with shape [batch_dim, state_dim, 1].
+        the function returns tensors with shape [batch_dim, state_dim].
     - cost_model: the cost as a distribution.
-        the function returns tensors with shape [batch_dim, 1, 1].
+        the function returns tensors with shape [batch_dim].
 
     - h: the number of steps into the future for the planner.
     - n: the number of iterations to run.
@@ -37,7 +37,7 @@ def iterative_lqr(
 
     Returns:
     - controls_model: the policy as a function.
-        the function returns tensors with shape [batch_dim, controls_dim, 1].
+        the function returns tensors with shape [batch_dim, controls_dim].
     """
     xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h)
 
@@ -47,8 +47,8 @@ def iterative_lqr(
     controls_dim = tf.shape(ui)[2]
 
     # flatten and keep the last states visited
-    xim1 = tf.reshape(xi, [h * batch_dim, state_dim, 1])
-    uim1 = tf.reshape(ui, [h * batch_dim, controls_dim, 1])
+    xim1 = tf.reshape(xi, [h * batch_dim, state_dim])
+    uim1 = tf.reshape(ui, [h * batch_dim, controls_dim])
 
     # run lqr iteratively for n steps
     for iteration in range(n):
@@ -57,8 +57,8 @@ def iterative_lqr(
         xi, ui, ci = shooting(x0, controls_model, dynamics_model, cost_model, h=h)
 
         # flatten the states and controls
-        xi = tf.reshape(xi, [h * batch_dim, state_dim, 1])
-        ui = tf.reshape(ui, [h * batch_dim, controls_dim, 1])
+        xi = tf.reshape(xi, [h * batch_dim, state_dim])
+        ui = tf.reshape(ui, [h * batch_dim, controls_dim])
 
         # compute the first order taylor series
         Fx, Fu = first_order(dynamics_model, [xi, ui])[1:]
@@ -69,16 +69,18 @@ def iterative_lqr(
 
         # wrap the cost model to make the hessian positive definite
         def wrapped_cost(time, inputs):
+            x_error = (inputs[0] - xim1)[:, :, tf.newaxis]
+            u_error = (inputs[1] - uim1)[:, :, tf.newaxis]
             return (1.0 - a) * cost_model(time, inputs) + a * (
-                tf.matmul(inputs[0] - xim1, inputs[0] - xim1, transpose_a=True) +
-                tf.matmul(inputs[1] - uim1, inputs[1] - uim1, transpose_a=True))
+                tf.matmul(x_error, x_error, transpose_a=True) +
+                tf.matmul(u_error, u_error, transpose_a=True))
 
         # compute the second order taylor series
         Cx, Cu, Cxx, Cxu, Cux, Cuu = second_order(wrapped_cost, [xi, ui])[1:]
 
         # unflatten the taylor series
-        Cx = tf.reshape(Cx, [h, batch_dim, state_dim, 1])
-        Cu = tf.reshape(Cu, [h, batch_dim, controls_dim, 1])
+        Cx = tf.reshape(Cx, [h, batch_dim, state_dim])
+        Cu = tf.reshape(Cu, [h, batch_dim, controls_dim])
 
         # unflatten the taylor series
         Cxx = tf.reshape(Cxx, [h, batch_dim, state_dim, state_dim])
@@ -87,7 +89,7 @@ def iterative_lqr(
         Cuu = tf.reshape(Cuu, [h, batch_dim, controls_dim, controls_dim])
 
         # perform lqr with the nonlinear models
-        Qxx, Qxu, Qux, Quu, Qx, Qu, Kx, k, Vxx, Vx = lqr(
+        Qxx, Qxu, Qux, Quu, Qx, Qu, Kx, k, S, Vxx, Vx = lqr(
             Fx, Fu, Cxx, Cxu, Cux, Cuu, Cx, Cu)
 
         # save the last visited states
@@ -95,12 +97,21 @@ def iterative_lqr(
         uim1 = ui
 
         # unflatten the states and controls
-        inner_xi = tf.reshape(xi, [h, batch_dim, state_dim, 1])
-        inner_ui = tf.reshape(ui, [h, batch_dim, controls_dim, 1])
+        inner_xi = tf.reshape(xi, [h, batch_dim, state_dim])
+        inner_ui = tf.reshape(ui, [h, batch_dim, controls_dim])
+
+        # build the parameters of a linear gaussian
+        def get_parameters(time, inputs):
+            x_delta = inputs[0] - inner_xi[time, :, :]
+            u_delta = (Kx[time, :, :, :] @ x_delta[:, :, tf.newaxis])[:, :, 0] + k[time, :, :]
+            mean = inner_ui[time, :, :] + u_delta
+            covariance = S[time, :, :, :]
+            return (mean,
+                    tf.linalg.sqrtm(covariance),
+                    tf.linalg.inv(covariance),
+                    tf.linalg.logdet(covariance))
 
         # create a new linear gaussian policy
-        controls_model = Deterministic(lambda time, inputs: (
-            inner_ui[time, :, :, :] +
-            Kx[time, :, :, :] @ (inputs[0] - inner_xi[time, :, :, :]) + k[time, :, :, :]))
+        controls_model = Gaussian(get_parameters)
 
     return controls_model

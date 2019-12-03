@@ -12,13 +12,13 @@ def first_order(
 
     Args:
     - nonlinear_model: a nonlinear model that is a distribution
-        the function accepts inputs of shape [batch_dim, input_dim, 1].
+        the function accepts inputs of shape [batch_dim, input_dim].
     - inputs[i]: the vector around which to build a local approximation
-        with shape [batch_dim, input_dim, 1].
+        with shape [batch_dim, input_dim].
 
     Returns:
     - outputs: the outputs of the function at center
-        with shape [batch_dim, output_dim, 1].
+        with shape [batch_dim, output_dim].
     - jacobians[i]: the jacobian of the outputs wrt. center
         with shape [batch_dim, output_dim, input_dim].
     """
@@ -30,7 +30,7 @@ def first_order(
         outputs = nonlinear_model(0, inputs)
 
     jacobians = [tape.batch_jacobian(
-        outputs, inputs[i], experimental_use_pfor=False)[:, :, 0, :, 0] for i in range(len(inputs))]
+        outputs, inputs[i], experimental_use_pfor=False) for i in range(len(inputs))]
 
     return [outputs] + jacobians
 
@@ -43,17 +43,17 @@ def second_order(
 
     Args:
     - nonlinear_model: a nonlinear model that is a distribution
-        the function accepts inputs of shape [batch_dim, input_dim, 1].
+        the function accepts inputs of shape [batch_dim, input_dim].
     - inputs[i]: the vector around which to build a local approximation
-        with shape [batch_dim, input_dim, 1].
+        with shape [batch_dim, input_dim].
 
     Returns:
     - outputs: the outputs of the function at center
-        with shape [batch_dim, 1, 1].
+        with shape [batch_dim, output_dim].
     - jacobians[i]: the jacobian of the outputs wrt. center
-        with shape [batch_dim, input_dim, 1].
+        with shape [batch_dim, output_dim, input_dim].
     - hessians[i]: the hessian of the outputs wrt. center
-        with shape [batch_dim, input_dim, input_dim].
+        with shape [batch_dim, output_dim, input_dim, input_dim].
     """
     with tf.GradientTape(persistent=True) as outer_tape:
 
@@ -68,10 +68,10 @@ def second_order(
             outputs = nonlinear_model(0, inputs)
 
         jacobians = [inner_tape.batch_jacobian(
-            outputs, inputs[i], experimental_use_pfor=False)[:, 0, 0, :, :] for i in range(len(inputs))]
+            outputs, inputs[i], experimental_use_pfor=False) for i in range(len(inputs))]
 
     hessians = [[outer_tape.batch_jacobian(
-        jacobians[i], inputs[j], experimental_use_pfor=False)[:, :, 0, :, 0] for j in range(len(inputs))]
+        jacobians[i], inputs[j], experimental_use_pfor=False) for j in range(len(inputs))]
             for i in range(len(jacobians))]
 
     return [outputs] + jacobians + [x for y in hessians for x in y]
