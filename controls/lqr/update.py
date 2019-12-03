@@ -4,7 +4,7 @@
 import tensorflow as tf
 
 
-def lqr_update(
+def update(
         Vxx,
         Vx,
         Fx,
@@ -62,6 +62,8 @@ def lqr_update(
         with shape [batch_dim, controls_dim, state_dim].
     - k: the shift term of the controls
         with shape [batch_dim, controls_dim, 1].
+    - S: covariance of the maximum entropy controls
+        with shape [batch_dim, controls_dim, controls_dim].
 
     - Vxx: the hessian of the cost to go wrt. state i state j
         with shape [batch_dim, state_dim, state_dim].
@@ -89,4 +91,15 @@ def lqr_update(
     Vxx = Qxx + tf.matmul(Qxu, Kx) + tf.matmul(Kx, Qux, transpose_a=True) + tf.matmul(KxQuu, Kx)
     Vx = Qx + tf.matmul(Qxu, k) + tf.matmul(Kx, Qu, transpose_a=True) + tf.matmul(KxQuu, k)
 
-    return Qxx, Qxu, Qux, Quu, Qx, Qu, Kx, k, Vxx, Vx
+    return (
+        Qxx,
+        Qxu,
+        Qux,
+        Quu,
+        Qx,
+        Qu,
+        Kx,
+        k,
+        Quu_inv,
+        Vxx,
+        Vx)

@@ -1,8 +1,7 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.shooting.shooting import shooting
-from controls.distributions.deterministic import Deterministic
+from controls.shooting import shooting
 import tensorflow as tf
 
 
@@ -15,65 +14,63 @@ def cem(
         c=1000,
         n=10,
         k=100,
-        s=0.1
 ):
-    """Solves for optimal actions using the cross entropy method.
+    """Solves for optimal controls using the cross entropy method.
 
     Args:
     - x0: the initial states from which to predict into the future
-        with shape [batch_dim, state_dim, 1].
+        with shape [batch_dim, state_dim].
 
-    - controls_model: the initial policy as a distribution.
-        the function returns tensors with shape [batch_dim, controls_dim, 1].
-    - dynamics_model: the dynamics as a distribution.
-        the function returns tensors with shape [batch_dim, state_dim, 1].
-    - cost_model: the cost as a distribution.
-        the function returns tensors with shape [batch_dim, 1, 1].
+    - controls_model: the initial policy as a random function.
+        the function returns tensors with shape [batch_dim, controls_dim].
+    - dynamics_model: the dynamics as a random function.
+        the function returns tensors with shape [batch_dim, state_dim].
+    - cost_model: the cost as a random function.
+        the function returns tensors with shape [batch_dim].
 
     - h: the number of steps into the future for the planner.
     - c: the number of candidates to samples.
     - n: the number of iterations to run cem over.
     - k: the number of samples to average.
-    - s: the std of noise to apply to the action samples.
 
     Returns:
-    - controls_model: the policy as a function.
-        the function returns tensors with shape [batch_dim, controls_dim, 1].
+    - controls_model: the policy as a random function.
+        the function returns tensors with shape [batch_dim, controls_dim].
     """
     batch_dim = tf.shape(x0)[0]
-    dtype = x0.dtype
+    state_dim = tf.shape(x0)[1]
 
     # tile the states for the number of candidate runs
-    x0 = tf.tile(x0, [c, 1, 1])
+    x0 = tf.reshape(tf.tile(x0[:, tf.newaxis, :], [1, c, 1]), [batch_dim * c, state_dim])
 
-    # iteratively run forward shooting and backward controls optimization with lqr
+    # iteratively run forward shooting and cross entropy minimization
     for iteration in range(n):
 
-        # wrap the controls model with exploration noise
-        def wrapped_controls_model(time, inputs):
-            wrapped_ui = tf.tile(controls_model(time, inputs)[:, tf.newaxis, :, :], [1, c, 1, 1])
-            wrapped_ui = tf.reshape(wrapped_ui, [batch_dim * c, tf.shape(wrapped_ui)[2], 1])
-            return wrapped_ui + s * tf.random.normal(tf.shape(wrapped_ui), dtype=dtype)
+        # wrap the policy and tile the batch size by c
+        if iteration > 0:
+            original_get_parameters = controls_model.get_parameters
+            controls_model = type(controls_model)(lambda time, inputs: [
+                tf.reshape(tf.tile(x[:, tf.newaxis, ...], [1, c] + [1 for s in tf.shape(x)[1:]]),
+                           [tf.shape(x)[0] * c] + [s for s in tf.shape(x)[1:]])
+                for x in original_get_parameters(time, inputs)])
 
         # run an initial forward pass using the shooting algorithm
-        inner_controls_model = Deterministic(wrapped_controls_model)
         xi, ui, ci = shooting(
-            x0, inner_controls_model, dynamics_model, cost_model, h)
+            x0, controls_model, dynamics_model, cost_model, h=h)
 
         # compute the top k action samples by their negative cost
-        best_idx = tf.math.top_k(-tf.reduce_sum(
-            tf.reshape(ci, [h, batch_dim, c]), axis=0), k=k)[1]
+        best_costs, best_idx = tf.math.top_k(-tf.reduce_sum(
+            tf.reshape(ci, [h, batch_dim, c]), axis=0), k=k)
 
         # infer the cardinality of the controls from the shooting
         controls_dim = tf.shape(ui)[2]
 
         # compute the controls sequences in the top k
-        top_ui = tf.gather(tf.reshape(ui, [h, batch_dim, c, controls_dim, 1]),
+        top_ui = tf.gather(tf.reshape(ui, [h, batch_dim, c, controls_dim]),
                            tf.tile(best_idx[tf.newaxis, :, :], [h, 1, 1]), axis=2, batch_dims=2)
 
-        # compute the empirical average of the best candidate controls
-        ui = tf.reduce_mean(top_ui, axis=2)
-        controls_model = Deterministic(lambda time, inputs: ui[time, :, :, :])
+        # update the distributions of the controls using the top k
+        controls_model = controls_model.fit(top_ui)
 
     # return the latest and greatest controls model
     return controls_model
