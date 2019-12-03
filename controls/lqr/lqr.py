@@ -70,7 +70,7 @@ def lqr(
     ):
         Qxx, Qxu, Qux, Quu, Qx, Qu, Kx, k, S, Vxx, Vx = update(
             inputs[0],
-            inputs[1][:, :, tf.newaxis],
+            inputs[1],
             inputs[2][inputs[21], :, :, :],
             inputs[3][inputs[21], :, :, :],
             inputs[4][inputs[21], :, :, :],
@@ -82,7 +82,7 @@ def lqr(
 
         return (
             Vxx,
-            Vx[:, :, 0],
+            Vx,
             inputs[2],
             inputs[3],
             inputs[4],
@@ -109,7 +109,7 @@ def lqr(
         lambda *inputs: tf.greater_equal(inputs[21], 0),
         body, (
             tf.zeros_like(Cxx[0, :, :, :]),
-            tf.zeros_like(Cx[0, :, :]),
+            tf.zeros_like(Cx[0, :, :])[:, :, tf.newaxis],
             Fx,
             Fu,
             Cxx,
