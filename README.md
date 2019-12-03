@@ -41,19 +41,19 @@ Q = tf.constant([[[0.0, 0.0, 0.0],
 
 R = tf.constant([[[1.0]]])
 
-def dynamics_model(x):
-    return A @ x[0] + B @ x[1]
+def dynamics_model(time, inputs):
+    return A @ inputs[0] + B @ inputs[1]
 
-def cost_model(x):
-    return (tf.matmul(tf.matmul(x[0], Q, transpose_a=True), x[0]) + 
-            tf.matmul(tf.matmul(x[1], R, transpose_a=True), x[1])) / 2.
+def cost_model(time, inputs):
+    return (tf.matmul(tf.matmul(inputs[0], Q, transpose_a=True), inputs[0]) + 
+            tf.matmul(tf.matmul(inputs[1], R, transpose_a=True), inputs[1])) / 2.
 ```
 
 Define your initial policy where the optimizer starts.
 
 ```
-def controls_model(x):
-    return tf.zeros([tf.shape(x[0])[0], 1, 1])
+def controls_model(time, inputs):
+    return tf.zeros([1, 1, 1])
 ```
 
 Launch the optimizer to get a new policy.
@@ -64,9 +64,9 @@ controls_model = cem(
     controls_model,
     dynamics_model,
     cost_model,
-    horizon=20,
-    num_candidates=1000,
-    num_iterations=100,
-    top_k=100,
-    exploration_noise_std=1.0)
+    h=20,
+    c=1000,
+    n=100,
+    k=100,
+    s=0.5)
 ```
