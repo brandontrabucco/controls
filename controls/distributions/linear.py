@@ -95,7 +95,7 @@ class Linear(Deterministic):
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
-            return delta + (mean if mean is not None else 0)
+            return delta + (mean if mean is not None else 0),
 
         Deterministic.__init__(self, linear_model)
 
@@ -123,6 +123,6 @@ class TimeVaryingLinear(Deterministic):
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
-            return delta + (mean[time] if mean is not None else 0)
+            return delta + (mean[time] if mean is not None else 0),
 
         Deterministic.__init__(self, linear_model)

@@ -50,7 +50,7 @@ class QuadraticGaussian(Gaussian):
                     tf.linalg.inv(covariance),
                     tf.linalg.logdet(covariance))
 
-        Gaussian.__init__(self, linear_gaussian_model)
+        Gaussian.__init__(self, quadratic_gaussian_model)
 
 
 class TimeVaryingQuadraticGaussian(Gaussian):
@@ -137,7 +137,7 @@ class Quadratic(Deterministic):
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])
                         delta = delta + 0.5 * out[:, :, 0, 0]
 
-            return delta + (mean if mean is not None else 0)
+            return delta + (mean if mean is not None else 0),
 
         Deterministic.__init__(self, quadratic_model)
 
@@ -179,6 +179,6 @@ class TimeVaryingQuadratic(Deterministic):
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])
                         delta = delta + 0.5 * out[:, :, 0, 0]
 
-            return delta + (mean[time] if mean is not None else 0)
+            return delta + (mean[time] if mean is not None else 0),
 
         Deterministic.__init__(self, quadratic_model)

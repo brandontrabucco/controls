@@ -7,7 +7,7 @@ from controls.distributions.discrete.categorical import Categorical
 import tensorflow as tf
 
 
-class ZerosDeterministic(Deterministic):
+class Zeros(Deterministic):
 
     def __init__(self, size):
         """Create a distribution for a zeros variable.
@@ -17,7 +17,8 @@ class ZerosDeterministic(Deterministic):
         """
         Deterministic.__init__(
             self,
-            lambda time, inputs: tf.zeros([tf.shape(inputs[0])[0], size]))
+            lambda time, inputs: (
+                tf.zeros([tf.shape(inputs[0])[0], size]),))
 
 
 class UnitGaussian(Gaussian):
