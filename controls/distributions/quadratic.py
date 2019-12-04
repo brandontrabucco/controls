@@ -29,7 +29,7 @@ class QuadraticGaussian(Gaussian):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0 if x0 is not None else 0)
 
-                if jacobian is not None and jacobian != 0:
+                if jacobian is not None:
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -39,7 +39,7 @@ class QuadraticGaussian(Gaussian):
                 for hessian, y, y0 in zip(tmp, inputs, centers):
                     y = y - (y0 if y0 is not None else 0)
 
-                    if hessian is not None and hessian != 0:
+                    if hessian is not None:
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
                                         hessian, transpose_a=True)
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])
@@ -76,7 +76,7 @@ class TimeVaryingQuadraticGaussian(Gaussian):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0[time] if x0 is not None else 0)
 
-                if jacobian is not None and jacobian != 0:
+                if jacobian is not None:
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -86,7 +86,7 @@ class TimeVaryingQuadraticGaussian(Gaussian):
                 for hessian, y, y0 in zip(tmp, inputs, centers):
                     y = y - (y0[time] if y0 is not None else 0)
 
-                    if hessian is not None and hessian != 0:
+                    if hessian is not None:
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
                                         hessian, transpose_a=True)
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])
@@ -121,7 +121,7 @@ class Quadratic(Deterministic):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0 if x0 is not None else 0)
 
-                if jacobian is not None and jacobian != 0:
+                if jacobian is not None:
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -131,7 +131,7 @@ class Quadratic(Deterministic):
                 for hessian, y, y0 in zip(tmp, inputs, centers):
                     y = y - (y0 if y0 is not None else 0)
 
-                    if hessian is not None and hessian != 0:
+                    if hessian is not None:
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
                                         hessian, transpose_a=True)
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])
@@ -163,7 +163,7 @@ class TimeVaryingQuadratic(Deterministic):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0[time] if x0 is not None else 0)
 
-                if jacobian is not None and jacobian != 0:
+                if jacobian is not None:
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -173,7 +173,7 @@ class TimeVaryingQuadratic(Deterministic):
                 for hessian, y, y0 in zip(tmp, inputs, centers):
                     y = y - (y0[time] if y0 is not None else 0)
 
-                    if hessian is not None and hessian != 0:
+                    if hessian is not None:
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
                                         hessian[time], transpose_a=True)
                         out = tf.matmul(out, y[:, tf.newaxis, :, tf.newaxis])

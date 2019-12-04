@@ -41,7 +41,7 @@ class Deterministic(Distribution):
         - log_prob: the log probability of samples
             with shape [batch_dim].
         """
-        samples = self.get_parameters(time, inputs)
+        samples = self.get_parameters(time, inputs)[0]
         return samples, tf.zeros([tf.shape(samples)[0]])
 
     def expected_value(
@@ -62,7 +62,7 @@ class Deterministic(Distribution):
         - log_prob: the log probability of samples
             with shape [batch_dim].
         """
-        samples = self.get_parameters(time, inputs)
+        samples = self.get_parameters(time, inputs)[0]
         return samples, tf.zeros([tf.shape(samples)[0]])
 
     def log_prob(
