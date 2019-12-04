@@ -1,23 +1,22 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
+from controls import Deterministic
 from controls import iterative_lqr
 from controls import shooting
 import tensorflow as tf
 
-from controls.distributions.deterministic import Deterministic
 
 if __name__ == "__main__":
 
     size = 5
-
     goal = tf.ones([1, size])
+    initial_states = -tf.ones([1, size])
 
     controls_model = Deterministic(lambda time, inputs: tf.zeros([1, size]))
     dynamics_model = Deterministic(lambda time, inputs: inputs[0] + inputs[1])
-    cost_model = Deterministic(lambda time, inputs: tf.reduce_sum((inputs[0] - goal)**2, axis=1))
-
-    initial_states = -tf.ones([1, size])
+    cost_model = Deterministic(lambda time, inputs: tf.reduce_sum(
+        (inputs[0] - goal)**2, axis=1, keepdims=True))
 
     controls_model = iterative_lqr(
         initial_states,

@@ -2,7 +2,7 @@
 
 
 from controls import lqr
-from controls.distributions.deterministic import Deterministic
+from controls.distributions.continuous.deterministic import Deterministic
 from controls.shooting import shooting
 import tensorflow as tf
 

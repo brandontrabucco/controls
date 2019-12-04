@@ -26,7 +26,7 @@ def cem(
     - dynamics_model: the dynamics as a random function.
         the function returns tensors with shape [batch_dim, state_dim].
     - cost_model: the cost as a random function.
-        the function returns tensors with shape [batch_dim].
+        the function returns tensors with shape [batch_dim, 1].
 
     - h: the number of steps into the future for the planner.
     - c: the number of candidates to samples.
@@ -48,11 +48,11 @@ def cem(
 
         # wrap the policy and tile the batch size by c
         if iteration > 0:
-            original_get_parameters = controls_model.get_parameters
-            controls_model = type(controls_model)(lambda time, inputs: [
+            original_model = controls_model.model
+            controls_model.model = lambda time, inputs: [
                 tf.reshape(tf.tile(x[:, tf.newaxis, ...], [1, c] + [1 for s in tf.shape(x)[1:]]),
                            [tf.shape(x)[0] * c] + [s for s in tf.shape(x)[1:]])
-                for x in original_get_parameters(time, inputs)])
+                for x in original_model(time, inputs)]
 
         # run an initial forward pass using the shooting algorithm
         xi, ui, ci = shooting(

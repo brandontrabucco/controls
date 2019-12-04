@@ -1,7 +1,7 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.distributions.gaussian import Gaussian
+from controls.distributions.continuous.gaussian import Gaussian
 import tensorflow as tf
 
 

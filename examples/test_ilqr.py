@@ -1,7 +1,9 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.distributions.gaussian import Gaussian
+from controls import UnitGaussian
+from controls import Linear
+from controls import Quadratic
 from controls import iterative_lqr
 from controls import shooting
 import tensorflow as tf
@@ -23,18 +25,9 @@ if __name__ == "__main__":
 
     R = tf.constant([[[1.0]]])
 
-    controls_model = Gaussian(lambda time, inputs: (
-        tf.zeros([1, 1]), tf.ones([1, 1, 1]), tf.ones([1, 1, 1]), tf.zeros([1])))
-
-    def dynamics_model(time, inputs):
-        return (A @ inputs[0][:, :, tf.newaxis] + B @ inputs[1][:, :, tf.newaxis])[:, :, 0]
-
-    def cost_model(time, inputs):
-        return 0.5 * (
-            tf.matmul(tf.matmul(inputs[0][:, :, tf.newaxis], Q, transpose_a=True),
-                      inputs[0][:, :, tf.newaxis]) +
-            tf.matmul(tf.matmul(inputs[1][:, :, tf.newaxis], R, transpose_a=True),
-                      inputs[1][:, :, tf.newaxis]))[:, 0, 0]
+    controls_model = UnitGaussian(1)
+    dynamics_model = Linear(0, [0, 0], [A, B])
+    cost_model = Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 
     initial_states = tf.random.normal([1, 3])
 
