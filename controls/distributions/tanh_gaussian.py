@@ -26,9 +26,11 @@ class TanhGaussian(Gaussian):
         error = samples - mean[:, :, tf.newaxis, :]
         covariance = tf.matmul(error, error, transpose_a=True) / tf.cast(tf.shape(samples)[2], tf.float32)
         covariance = covariance + 1e-3 * tf.eye(tf.shape(mean)[1], batch_shape=tf.shape(samples)[:2])
+
         std = tf.linalg.sqrtm(covariance)
         precision = tf.linalg.inv(covariance)
         log_determinant = tf.linalg.logdet(covariance)
+
         return TanhGaussian(lambda time, inputs: (
             mean[time], std[time], precision[time], log_determinant[time]))
 
