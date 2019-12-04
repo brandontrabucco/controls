@@ -13,10 +13,10 @@ if __name__ == "__main__":
     goal = tf.ones([1, size])
     initial_states = -tf.ones([1, size])
 
-    controls_model = Deterministic(lambda time, inputs: tf.zeros([1, size]))
-    dynamics_model = Deterministic(lambda time, inputs: inputs[0] + inputs[1])
-    cost_model = Deterministic(lambda time, inputs: tf.reduce_sum(
-        (inputs[0] - goal)**2, axis=1, keepdims=True))
+    controls_model = Deterministic(lambda time, inputs: [tf.zeros([1, size])])
+    dynamics_model = Deterministic(lambda time, inputs: [inputs[0] + inputs[1]])
+    cost_model = Deterministic(lambda time, inputs: [tf.reduce_sum(
+        (inputs[0] - goal)**2, axis=1, keepdims=True)])
 
     controls_model = iterative_lqr(
         initial_states,

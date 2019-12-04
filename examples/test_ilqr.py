@@ -1,7 +1,7 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls import UnitGaussian
+from controls import Zeros
 from controls import Linear
 from controls import Quadratic
 from controls import iterative_lqr
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     R = tf.constant([[[1.0]]])
 
-    controls_model = UnitGaussian(1)
+    controls_model = Zeros(1)
     dynamics_model = Linear(0, [0, 0], [A, B])
     cost_model = Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 

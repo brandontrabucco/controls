@@ -10,6 +10,7 @@ from controls.distributions.continuous.gaussian import Gaussian
 from controls.distributions.discrete.categorical import Categorical
 from controls.distributions.continuous.deterministic import Deterministic
 
+from controls.distributions import Zeros
 from controls.distributions import UnitGaussian
 from controls.distributions import UniformCategorical
 
