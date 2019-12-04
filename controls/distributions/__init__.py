@@ -168,8 +168,8 @@ class QuadraticGaussian(Gaussian):
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
-            for sub_hessians, x in zip(hessians, inputs):
-                for hessian, y in zip(sub_hessians, inputs):
+            for tmp, x in zip(hessians, inputs):
+                for hessian, y in zip(tmp, inputs):
                     if hessian is not None and hessian != 0:
 
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
@@ -208,8 +208,8 @@ class TimeVaryingQuadraticGaussian(Gaussian):
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
-            for sub_hessians, x in zip(hessians, inputs):
-                for hessian, y in zip(sub_hessians, inputs):
+            for tmp, x in zip(hessians, inputs):
+                for hessian, y in zip(tmp, inputs):
                     if hessian is not None and hessian != 0:
 
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
@@ -246,8 +246,8 @@ class Quadratic(Deterministic):
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
-            for sub_hessians, x in zip(hessians, inputs):
-                for hessian, y in zip(sub_hessians, inputs):
+            for tmp, x in zip(hessians, inputs):
+                for hessian, y in zip(tmp, inputs):
                     if hessian is not None and hessian != 0:
 
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
@@ -281,8 +281,8 @@ class TimeVaryingQuadratic(Deterministic):
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
-            for sub_hessians, x in zip(hessians, inputs):
-                for hessian, y in zip(sub_hessians, inputs):
+            for tmp, x in zip(hessians, inputs):
+                for hessian, y in zip(tmp, inputs):
                     if hessian is not None and hessian != 0:
 
                         out = tf.matmul(x[:, tf.newaxis, :, tf.newaxis],
