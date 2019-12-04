@@ -27,7 +27,7 @@ class LinearGaussian(Gaussian):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0 if x0 is not None else 0)
 
-                if jacobian is not None:
+                if jacobian is not None and not tf.reduce_all(tf.equal(jacobian, 0)):
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -60,7 +60,7 @@ class TimeVaryingLinearGaussian(Gaussian):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0[time] if x0 is not None else 0)
 
-                if jacobian is not None:
+                if jacobian is not None and not tf.reduce_all(tf.equal(jacobian, 0)):
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -91,7 +91,7 @@ class Linear(Deterministic):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0 if x0 is not None else 0)
 
-                if jacobian is not None:
+                if jacobian is not None and not tf.reduce_all(tf.equal(jacobian, 0)):
                     delta = delta + (
                         jacobian @ x[:, :, tf.newaxis])[:, :, 0]
 
@@ -119,7 +119,7 @@ class TimeVaryingLinear(Deterministic):
             for jacobian, x, x0 in zip(jacobians, inputs, centers):
                 x = x - (x0[time] if x0 is not None else 0)
 
-                if jacobian is not None:
+                if jacobian is not None and not tf.reduce_all(tf.equal(jacobian, 0)):
                     delta = delta + (
                         jacobian[time] @ x[:, :, tf.newaxis])[:, :, 0]
 

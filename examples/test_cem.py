@@ -26,8 +26,8 @@ if __name__ == "__main__":
     R = tf.constant([[[1.0]]])
 
     controls_model = UnitGaussian(1)
-    dynamics_model = Linear(None, [None, None], [A, B])
-    cost_model = Quadratic(None, [None, None], [None, None], [[Q, None], [None, R]])
+    dynamics_model = Linear(0, [0, 0], [A, B])
+    cost_model = Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 
     initial_states = tf.random.normal([1, 3])
 
