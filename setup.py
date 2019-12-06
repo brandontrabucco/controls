@@ -6,9 +6,8 @@ from setuptools import setup
 
 
 REQUIRED_PACKAGES = [
-    'tensorflow-gpu==2.0.0-rc0',
-    'numpy'
-]
+    'tensorflow-gpu==2.1.0-rc0',
+    'numpy']
 
 
 setup(
@@ -17,5 +16,4 @@ setup(
     install_requires=REQUIRED_PACKAGES,
     include_package_data=True,
     packages=[p for p in find_packages() if p.startswith('controls')],
-    description='Differentiable Optimal Controls'
-)
+    description='Differentiable Optimal Controls')
