@@ -6,6 +6,7 @@ from controls.shooting import shooting
 from controls.iterative_lqr import iterative_lqr
 from controls.lqr.lqr import lqr
 
+from controls.distributions.distribution import Distribution
 from controls.distributions.continuous.gaussian import Gaussian
 from controls.distributions.discrete.categorical import Categorical
 from controls.distributions.continuous.deterministic import Deterministic
