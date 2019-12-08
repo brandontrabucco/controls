@@ -15,7 +15,7 @@ pip install git+git://github.com/brandontrabucco/controls.git
 Collect a batch of initial states to use for planning
 
 ```
-initial_states = <...your code here...>
+initial_states = tf.random.normal([1, 3])
 ```
 
 Create a dynamics model that predicts future states given current states and controls.
