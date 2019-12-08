@@ -15,6 +15,7 @@ pip install git+git://github.com/brandontrabucco/controls.git
 Collect a batch of initial states to use for planning.
 
 ```
+# a tf.EagerTensor with shape [batch_dim, state_dim]
 initial_states = tf.random.normal([1, 3])
 ```
 
@@ -46,6 +47,7 @@ cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 Launch the optimizer to get a new policy.
 
 ```
+# a controls.Distribution that returns [batch_dim, controls_dim]
 controls_model = controls.iterative_lqr(
     initial_states,
     controls_model,
