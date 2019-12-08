@@ -1,9 +1,9 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls import lqr
-from controls.distributions.continuous.deterministic import Deterministic
-from controls.shooting import shooting
+from diffopt import lqr
+from diffopt.distributions.continuous.deterministic import Deterministic
+from diffopt.shooting import shooting
 import tensorflow as tf
 
 

@@ -1,11 +1,11 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.lqr.lqr import lqr
-from controls.shooting import shooting
-from controls.taylor_series import first_order
-from controls.taylor_series import second_order
-from controls.distributions.linear import TimeVaryingLinearGaussian
+from diffopt.lqr.lqr import lqr
+from diffopt.shooting import shooting
+from diffopt.taylor_series import first_order
+from diffopt.taylor_series import second_order
+from diffopt.distributions.linear import TimeVaryingLinearGaussian
 import tensorflow as tf
 
 
@@ -44,7 +44,7 @@ def iterative_lqr(
     xi, ui, ci = shooting(
         x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
-    # collect the tensor shapes of the states and controls
+    # collect the tensor shapes of the states and diffopt
     batch_dim = tf.shape(x0)[0]
     state_dim = tf.shape(x0)[1]
     controls_dim = tf.shape(ui)[2]
@@ -60,7 +60,7 @@ def iterative_lqr(
         xi, ui, ci = shooting(
             x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
-        # flatten the states and controls
+        # flatten the states and diffopt
         xi = tf.reshape(xi, [h * batch_dim, state_dim])
         ui = tf.reshape(ui, [h * batch_dim, controls_dim])
 
@@ -100,7 +100,7 @@ def iterative_lqr(
         xim1 = xi
         uim1 = ui
 
-        # unflatten the states and controls
+        # unflatten the states and diffopt
         inner_xi = tf.reshape(xi, [h, batch_dim, state_dim])
         inner_ui = tf.reshape(ui, [h, batch_dim, controls_dim])
 

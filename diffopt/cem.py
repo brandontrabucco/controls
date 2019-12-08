@@ -1,7 +1,7 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.shooting import shooting
+from diffopt.shooting import shooting
 import tensorflow as tf
 
 
@@ -15,7 +15,7 @@ def cem(
         n=10,
         k=100,
 ):
-    """Solves for optimal controls using the cross entropy method.
+    """Solves for optimal diffopt using the cross entropy method.
 
     Args:
     - x0: the initial states from which to predict into the future
@@ -62,15 +62,15 @@ def cem(
         best_costs, best_idx = tf.math.top_k(-tf.reduce_sum(
             tf.reshape(ci, [h, batch_dim, c]), axis=0), k=k)
 
-        # infer the cardinality of the controls from the shooting
+        # infer the cardinality of the diffopt from the shooting
         controls_dim = tf.shape(ui)[2]
 
-        # compute the controls sequences in the top k
+        # compute the diffopt sequences in the top k
         top_ui = tf.gather(tf.reshape(ui, [h, batch_dim, c, controls_dim]),
                            tf.tile(best_idx[tf.newaxis, :, :], [h, 1, 1]), axis=2, batch_dims=2)
 
-        # update the distributions of the controls using the top k
+        # update the distributions of the diffopt using the top k
         controls_model = controls_model.fit(top_ui)
 
-    # return the latest and greatest controls model
+    # return the latest and greatest diffopt model
     return controls_model

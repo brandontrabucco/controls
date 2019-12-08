@@ -1,9 +1,9 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.distributions.continuous.gaussian import Gaussian
-from controls.distributions.continuous.deterministic import Deterministic
-from controls.distributions.discrete.categorical import Categorical
+from diffopt.distributions.continuous.gaussian import Gaussian
+from diffopt.distributions.continuous.deterministic import Deterministic
+from diffopt.distributions.discrete.categorical import Categorical
 import tensorflow as tf
 
 

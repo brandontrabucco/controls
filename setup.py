@@ -11,9 +11,9 @@ REQUIRED_PACKAGES = [
 
 
 setup(
-    name='controls',
+    name='diffopt',
     version='0.1',
     install_requires=REQUIRED_PACKAGES,
     include_package_data=True,
-    packages=[p for p in find_packages() if p.startswith('controls')],
+    packages=[p for p in find_packages() if p.startswith('diffopt')],
     description='Differentiable Optimal Controls')

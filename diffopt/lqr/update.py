@@ -26,43 +26,43 @@ def update(
 
     - Fx: the jacobian of the dynamics wrt. state i
         with shape [batch_dim, state_dim, state_dim].
-    - Fu: the jacobian of the dynamics wrt. controls i
+    - Fu: the jacobian of the dynamics wrt. diffopt i
         with shape [batch_dim, state_dim, controls_dim].
 
     - Cxx: the hessian of the cost wrt. state i state j
         with shape [batch_dim, state_dim, state_dim].
-    - Cxu: the hessian of the cost wrt. state i controls j
+    - Cxu: the hessian of the cost wrt. state i diffopt j
         with shape [batch_dim, state_dim, controls_dim].
-    - Cux: the hessian of the cost wrt. controls i state j
+    - Cux: the hessian of the cost wrt. diffopt i state j
         with shape [batch_dim, controls_dim, state_dim].
-    - Cuu: the hessian of the cost wrt. controls i controls j
+    - Cuu: the hessian of the cost wrt. diffopt i diffopt j
         with shape [batch_dim, controls_dim, controls_dim].
 
     - Cx: the jacobian of the cost wrt. state i
         with shape [batch_dim, state_dim, 1].
-    - Cu: the jacobian of the cost wrt. controls i
+    - Cu: the jacobian of the cost wrt. diffopt i
         with shape [batch_dim, controls_dim, 1].
 
     Returns:
     - Qxx: the hessian of the cost to go wrt. state i state j
         with shape [batch_dim, state_dim, state_dim].
-    - Qxu: the hessian of the cost to go wrt. state i controls j
+    - Qxu: the hessian of the cost to go wrt. state i diffopt j
         with shape [batch_dim, state_dim, controls_dim].
-    - Qux: the hessian of the cost to go wrt. controls i state j
+    - Qux: the hessian of the cost to go wrt. diffopt i state j
         with shape [batch_dim, controls_dim, state_dim].
-    - Quu: the hessian of the cost to go wrt. controls i controls j
+    - Quu: the hessian of the cost to go wrt. diffopt i diffopt j
         with shape [batch_dim, controls_dim, controls_dim].
 
     - Qx: the jacobian of the cost to go wrt. state i
         with shape [batch_dim, state_dim, 1].
-    - Qu: the jacobian of the cost to go wrt. controls i
+    - Qu: the jacobian of the cost to go wrt. diffopt i
         with shape [batch_dim, controls_dim, 1].
 
-    - Kx: the jacobian of the controls with respect to the state
+    - Kx: the jacobian of the diffopt with respect to the state
         with shape [batch_dim, controls_dim, state_dim].
-    - k: the shift term of the controls
+    - k: the shift term of the diffopt
         with shape [batch_dim, controls_dim, 1].
-    - S: covariance of the maximum entropy controls
+    - S: covariance of the maximum entropy diffopt
         with shape [batch_dim, controls_dim, controls_dim].
 
     - Vxx: the hessian of the cost to go wrt. state i state j

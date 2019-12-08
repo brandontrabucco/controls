@@ -1,11 +1,11 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls import UnitGaussian
-from controls import Linear
-from controls import Quadratic
-from controls import iterative_lqr
-from controls import shooting
+from diffopt import UnitGaussian
+from diffopt import Linear
+from diffopt import Quadratic
+from diffopt import iterative_lqr
+from diffopt import shooting
 import tensorflow as tf
 
 

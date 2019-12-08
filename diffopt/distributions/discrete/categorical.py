@@ -1,7 +1,7 @@
 """Author: Brandon Trabucco, Copyright 2019, MIT License"""
 
 
-from controls.distributions.distribution import Distribution
+from diffopt.distributions.distribution import Distribution
 import tensorflow as tf
 
 
