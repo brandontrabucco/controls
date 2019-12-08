@@ -1,10 +1,10 @@
 # Controls
 
-This package implements differentiable optimal controls in TensorFlow 2.0. Have Fun! -Brandon
+Controls implements differentiable optimal controls in TensorFlow 2.0. Have Fun! -Brandon
 
 # Setup
 
-Install this package directly from github using pip.
+Install this package using pip.
 
 ```
 pip install git+git://github.com/brandontrabucco/controls.git
@@ -12,23 +12,13 @@ pip install git+git://github.com/brandontrabucco/controls.git
 
 # Usage
 
-Import the control algorithm you want to use.
+Collect a batch of initial states to use for planning
 
 ```
-from controls import UnitGaussian
-from controls import Linear
-from controls import Quadratic
-from controls import cem
-import tensorflow as tf
+initial_states = <...your code here...>
 ```
 
-Collect a batch of initial states.
-
-```
-initial_states = tf.random.normal([1, 3])
-```
-
-Define your dynamics model and cost model.
+Create a dynamics model that predicts into the future.
 
 ```
 A = tf.constant([[[-0.313, 56.7, 0.0],
@@ -39,32 +29,37 @@ B = tf.constant([[[0.232],
                   [0.0203],
                   [0.0]]])
 
+dynamics_model = controls.Linear(0, [0, 0], [A, B])
+```
+
+Create a cost model that evaluates the cost of states and controls.
+
+```
 Q = tf.constant([[[0.0, 0.0, 0.0],
                   [0.0, 0.0, 0.0],
                   [0.0, 0.0, 1.0]]])
 
 R = tf.constant([[[1.0]]])
 
-dynamics_model = Linear(0, [0, 0], [A, B])
-cost_model = Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
+cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 ```
 
-Define your initial policy where the optimizer starts.
+Define an initial policy where the optimizer starts.
 
 ```
-controls_model = UnitGaussian(1)
+controls_model = controls.Zeros(1)
 ```
 
 Launch the optimizer to get a new policy.
 
 ```
-controls_model = cem(
+controls_model = controls.iterative_lqr(
     initial_states,
     controls_model,
     dynamics_model,
     cost_model,
     h=20,
-    c=1000,
-    n=100,
-    k=100)
+    n=10,
+    a=0.1,
+    random=False)
 ```
