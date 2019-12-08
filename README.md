@@ -12,10 +12,16 @@ pip install git+git://github.com/brandontrabucco/controls.git
 
 # Usage
 
-Collect a batch of initial states to use for planning
+Collect a batch of initial states to use for planning.
 
 ```
 initial_states = tf.random.normal([1, 3])
+```
+
+Define an initial policy where the optimization process starts.
+
+```
+controls_model = controls.Zeros(1)
 ```
 
 Create a dynamics model that predicts future states given current states and controls.
@@ -32,12 +38,6 @@ Create a cost model that evaluates the cost of states and controls.
 Q = tf.constant([[[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]])
 R = tf.constant([[[1.0]]])
 cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
-```
-
-Define an initial policy where the optimizer starts.
-
-```
-controls_model = controls.Zeros(1)
 ```
 
 Launch the optimizer to get a new policy.
