@@ -1,6 +1,6 @@
 # DiffOpt
 
-DiffOpt implements differentiable optimal controls in TensorFlow 2.0. Have Fun! -Brandon
+DiffOpt implements differentiable optimal controls in TensorFlow 2. Have Fun! -Brandon
 
 ## Setup
 
