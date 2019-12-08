@@ -47,7 +47,7 @@ cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 Launch the optimizer to get a new policy.
 
 ```python
-# a controls.Distribution that returns [batch_dim, controls_dim]
+# a controls.TimeVaryingLinearGaussian that returns [batch_dim, controls_dim]
 controls_model = controls.iterative_lqr(
     initial_states,
     controls_model,
