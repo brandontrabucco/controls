@@ -18,7 +18,7 @@ Collect a batch of initial states to use for planning
 initial_states = <...your code here...>
 ```
 
-Create a dynamics model that predicts into the future.
+Create a dynamics model that predicts future states given current states and controls.
 
 ```
 A = tf.constant([[[-0.313, 56.7, 0.0], [-0.0139, -0.426, 0.0], [0.0, 56.7, 0.0]]])
