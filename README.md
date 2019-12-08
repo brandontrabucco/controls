@@ -21,7 +21,7 @@ initial_states = tf.random.normal([1, 3])
 Define an initial policy where the optimization process starts.
 
 ```
-controls_model = controls.Zeros(1)
+controls_model = controls.Zeros(1) # a controls.Distribution that returns [batch_dim, controls_dim]
 ```
 
 Create a dynamics model that predicts future states given current states and controls.
@@ -29,7 +29,7 @@ Create a dynamics model that predicts future states given current states and con
 ```
 A = tf.constant([[[-0.313, 56.7, 0.0], [-0.0139, -0.426, 0.0], [0.0, 56.7, 0.0]]])
 B = tf.constant([[[0.232], [0.0203], [0.0]]])
-dynamics_model = controls.Linear(0, [0, 0], [A, B])
+dynamics_model = controls.Linear(0, [0, 0], [A, B]) # a controls.Distribution that returns [batch_dim, state_dim]
 ```
 
 Create a cost model that evaluates the cost of states and controls.
@@ -37,7 +37,7 @@ Create a cost model that evaluates the cost of states and controls.
 ```
 Q = tf.constant([[[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]])
 R = tf.constant([[[1.0]]])
-cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
+cost_model = controls.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]]) # a controls.Distribution that returns [batch_dim, 1]
 ```
 
 Launch the optimizer to get a new policy.
