@@ -58,7 +58,3 @@ controls_model = controls.iterative_lqr(
     a=0.1,
     random=False)
 ```
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
