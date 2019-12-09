@@ -18,7 +18,7 @@ def shooting(
     - x0: the initial states from which to predict into the future
         with shape [batch_dim, state_dim].
 
-    - controls_model: the diffopt as a random function.
+    - controls_model: the controls as a random function.
         the function returns tensors with shape [batch_dim, controls_dim].
     - dynamics_model: the dynamics as a random function.
         the function returns tensors with shape [batch_dim, state_dim].
@@ -30,7 +30,7 @@ def shooting(
 
     Returns:
     - xi: the states with shape [T, batch_dim, state_dim].
-    - ui: the diffopt with shape [T, batch_dim, controls_dim].
+    - ui: the controls with shape [T, batch_dim, controls_dim].
     - ci: the costs with shape [T, batch_dim].
     """
     def shooting_body(

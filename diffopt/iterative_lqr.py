@@ -44,7 +44,7 @@ def iterative_lqr(
     xi, ui, ci = shooting(
         x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
-    # collect the tensor shapes of the states and diffopt
+    # collect the tensor shapes of the states and controls
     batch_dim = tf.shape(x0)[0]
     state_dim = tf.shape(x0)[1]
     controls_dim = tf.shape(ui)[2]
@@ -60,7 +60,7 @@ def iterative_lqr(
         xi, ui, ci = shooting(
             x0, controls_model, dynamics_model, cost_model, h=h, random=random)
 
-        # flatten the states and diffopt
+        # flatten the states and controls
         xi = tf.reshape(xi, [h * batch_dim, state_dim])
         ui = tf.reshape(ui, [h * batch_dim, controls_dim])
 
@@ -100,7 +100,7 @@ def iterative_lqr(
         xim1 = xi
         uim1 = ui
 
-        # unflatten the states and diffopt
+        # unflatten the states and controls
         inner_xi = tf.reshape(xi, [h, batch_dim, state_dim])
         inner_ui = tf.reshape(ui, [h, batch_dim, controls_dim])
 
