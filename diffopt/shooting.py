@@ -10,7 +10,7 @@ def shooting(
         dynamics_model,
         cost_model,
         h=5,
-        random=True
+        deterministic=True
 ):
     """Predicts into the future using random shooting.
 
@@ -26,7 +26,7 @@ def shooting(
         the function returns tensors with shape [batch_dim].
 
     - h: the number of steps into the future for the planner.
-    - random: samples from the policy randomly if true.
+    - deterministic: samples from the policy randomly if false.
 
     Returns:
     - xi: the states with shape [T, batch_dim, state_dim].
@@ -42,7 +42,7 @@ def shooting(
         horizon
     ):
         u = (controls_model.expected_value(
-            time, [x]) if not random else controls_model.sample(time, [x]))[0]
+            time, [x]) if deterministic else controls_model.sample(time, [x]))[0]
 
         return (
             dynamics_model(time, [x, u]),

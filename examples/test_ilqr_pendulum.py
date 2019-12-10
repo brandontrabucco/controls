@@ -42,10 +42,10 @@ if __name__ == "__main__":
         h=20,
         n=10,
         a=0.0,
-        random=False)
+        deterministic=True)
 
     shooting_states, shooting_controls, shooting_costs = shooting(
-        initial_states, controls_model, dynamics_model, cost_model, h=20, random=False)
+        initial_states, controls_model, dynamics_model, cost_model, h=20, deterministic=True)
 
     for i in range(20):
 

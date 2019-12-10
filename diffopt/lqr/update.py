@@ -77,20 +77,16 @@ def update(
     Qxu = Cxu + tf.matmul(FxVxx, Fu)
     Qux = Cux + tf.matmul(FuVxx, Fx)
     Quu = Cuu + tf.matmul(FuVxx, Fu)
-
-    Quu_inv = tf.linalg.inv(Quu)
-
     Qx = Cx + tf.matmul(Fx, Vx, transpose_a=True)
     Qu = Cu + tf.matmul(Fu, Vx, transpose_a=True)
 
-    Kx = -tf.matmul(Quu_inv, Qux)
-    k = -tf.matmul(Quu_inv, Qu)
-
+    S = tf.linalg.inv(Quu)
+    Kx = -tf.matmul(S, Qux)
+    k = -tf.matmul(S, Qu)
     KxQuu = tf.matmul(Kx, Quu, transpose_a=True)
 
     Vxx = Qxx + tf.matmul(Qxu, Kx) + tf.matmul(Kx, Qux, transpose_a=True) + tf.matmul(KxQuu, Kx)
     Vx = Qx + tf.matmul(Qxu, k) + tf.matmul(Kx, Qu, transpose_a=True) + tf.matmul(KxQuu, k)
-
     return (
         Qxx,
         Qxu,
@@ -100,6 +96,6 @@ def update(
         Qu,
         Kx,
         k,
-        Quu_inv,
+        S,
         Vxx,
         Vx)

@@ -56,7 +56,7 @@ def cem(
 
         # run an initial forward pass using the shooting algorithm
         xi, ui, ci = shooting(
-            x0, controls_model, dynamics_model, cost_model, h=h, random=True)
+            x0, controls_model, dynamics_model, cost_model, h=h, deterministic=True)
 
         # compute the top k action samples by their negative cost
         best_costs, best_idx = tf.math.top_k(-tf.reduce_sum(

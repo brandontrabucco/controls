@@ -17,7 +17,7 @@ def iterative_lqr(
         h=10,
         n=5,
         a=0.01,
-        random=True
+        deterministic=True
 ):
     """Solves for the value iteration solution to lqr iteratively.
 
@@ -35,14 +35,14 @@ def iterative_lqr(
     - h: the number of steps into the future for the planner.
     - n: the number of iterations to run.
     - a: the weight of the cost function trust region.
-    - random: samples from the policy randomly if true.
+    - deterministic: samples from the policy randomly if false.
 
     Returns:
     - controls_model: the policy as a function.
         the function returns tensors with shape [batch_dim, controls_dim].
     """
     xi, ui, ci = shooting(
-        x0, controls_model, dynamics_model, cost_model, h=h, random=random)
+        x0, controls_model, dynamics_model, cost_model, h=h, deterministic=deterministic)
 
     # collect the tensor shapes of the states and controls
     batch_dim = tf.shape(x0)[0]
@@ -58,7 +58,7 @@ def iterative_lqr(
 
         # run the forward dynamics probabilistically
         xi, ui, ci = shooting(
-            x0, controls_model, dynamics_model, cost_model, h=h, random=random)
+            x0, controls_model, dynamics_model, cost_model, h=h, deterministic=deterministic)
 
         # flatten the states and controls
         xi = tf.reshape(xi, [h * batch_dim, state_dim])

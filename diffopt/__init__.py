@@ -5,6 +5,8 @@ from diffopt.cem import cem
 from diffopt.shooting import shooting
 from diffopt.iterative_lqr import iterative_lqr
 from diffopt.lqr.lqr import lqr
+from diffopt.iterative_ddp import iterative_ddp
+from diffopt.ddp.ddp import ddp
 
 from diffopt.distributions.distribution import Distribution
 from diffopt.distributions.continuous.gaussian import Gaussian
