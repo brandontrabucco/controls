@@ -56,5 +56,5 @@ controls_model = diffopt.iterative_lqr(
     h=20,
     n=10,
     a=0.1,
-    random=False)
+    deterministic=True)
 ```
