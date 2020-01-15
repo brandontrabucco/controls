@@ -68,7 +68,7 @@ class TimeVaryingQuadraticGaussian(Gaussian):
         - jacobians[i]: a jacobian of the output wrt. input[i]
             with shape [T, batch_dim, output_dim, input_dim[i]]
         - hessians[i][j]: a hessian of the output wrt. input[i] and input[j]
-            with shape [batch_dim, output_dim, input_dim[i], input_dim[j]]
+            with shape [T, batch_dim, output_dim, input_dim[i], input_dim[j]]
         """
         def quadratic_gaussian_model(time, inputs):
             delta = 0.0
@@ -155,7 +155,7 @@ class TimeVaryingQuadratic(Deterministic):
         - jacobians[i]: a jacobian of the output wrt. input[i]
             with shape [T, batch_dim, output_dim, input_dim[i]]
         - hessians[i][j]: a hessian of the output wrt. input[i] and input[j]
-            with shape [batch_dim, output_dim, input_dim[i], input_dim[j]]
+            with shape [T, batch_dim, output_dim, input_dim[i], input_dim[j]]
         """
         def quadratic_model(time, inputs):
             delta = 0.0
