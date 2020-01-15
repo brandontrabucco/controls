@@ -39,8 +39,8 @@ Create a cost model that evaluates the cost of states and controls.
 
 ```python
 # a diffopt.Distribution that returns [batch_dim, 1]
-Q = tf.constant([[[[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]]])
-R = tf.constant([[[[1.0]]]])
+Q = tf.constant([[[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]])
+R = tf.constant([[[1.0]]])
 cost_model = diffopt.Quadratic(0, [0, 0], [0, 0], [[Q, 0], [0, R]])
 ```
 
