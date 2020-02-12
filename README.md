@@ -7,7 +7,7 @@ DiffOpt implements differentiable optimal controls in TensorFlow 2. Have Fun! -B
 Install this package using pip.
 
 ```
-pip install git+git://github.com/brandontrabucco/diffopt.git
+pip install git+http://github.com/brandontrabucco/diffopt.git
 ```
 
 ## Usage
