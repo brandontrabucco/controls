@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 REQUIRED_PACKAGES = [
-    'tensorflow==2.1',
+    'tensorflow==2.5.3',
     'numpy']
 
 
